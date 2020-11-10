@@ -1,6 +1,7 @@
 <script>
-import { deepClone, generateUUID } from '@/utils/index'
+import { deepClone, generateUUID } from '@/utils/formGenerator/index'
 import render from '@/components/FormGenerator/render/render.js'
+import { buildHooks, emit } from './parseHooks'
 
 const ruleTrigger = {
   'el-input': 'blur',
@@ -236,6 +237,7 @@ function formBtns(h) {
     <el-form-item size={this.formConfCopy.size}>
       <el-button type='primary' onClick={this.submitForm}>提交</el-button>
       <el-button onClick={this.resetForm}>重置</el-button>
+      <el-button onClick={() => emit('submit')}>测试提交</el-button>
     </el-form-item>
   </el-col>
 }
@@ -289,6 +291,7 @@ function buildListeners(scheme) {
 }
 let self = null
 export default {
+  name: 'Parser',
   components: {
     render
   },
@@ -327,6 +330,9 @@ export default {
         self.buildRules(self.formConfCopy.fields, self[self.formConf.formRules])
       }
     }
+  },
+  created() {
+    buildHooks(this)
   },
   mounted() {
     console.log(this.rules, this.formData)
@@ -393,31 +399,48 @@ export default {
       this.formConfCopy = deepClone(this.formConf)
       this.$refs[this.formConf.formRef].resetFields()
     },
-    submitForm() {
-      console.log(this.formData)
-      this.$refs[this.formConf.formRef].validate(valid => {
-        if (!valid) return false
-        // 处理数据
-        const formData = deepClone(this[this.formConf.formModel])
-        // 业务表格
-        this.formConfCopy.fields.forEach(item => {
-          if (item.__config__.layout === 'businessTable') {
-            const key = item.__config__.field
-            formData[key] = []
-            item.data.forEach(v => {
-              // eslint-disable-next-line no-unused-vars
-              const { dataKey, ...reset } = v
-              formData[key].push(reset)
-              item.__config__.children.forEach(column => {
-                delete formData[`${v.dataKey}${column.__config__.field}`]
-              })
-            })
-          }
+    // 钩子触发提交函数
+    submitFormHook() {
+      return new Promise((resolve, reject) => {
+        console.log(this.$refs[this.formConf.formRef].validate)
+        this.$refs[this.formConf.formRef].validate(valid => {
+          if (!valid) return reject(false)
+          const formData = this.getFormData()
+          resolve(formData)
+          return true
         })
+      })
+    },
+    // 普通提交
+    submitForm() {
+      this.$refs[this.formConf.formRef].validate(valid => {
+        if (!valid) return
+        const formData = this.getFormData()
         // 触发sumit事件
         this.$emit('submit', formData)
         return true
       })
+    },
+    getFormData() {
+      // 处理数据
+      const formData = deepClone(this[this.formConf.formModel])
+      // 业务表格
+      this.formConfCopy.fields.forEach(item => {
+        if (item.__config__.layout === 'businessTable') {
+          const key = item.__config__.field
+          formData[key] = []
+          item.data.forEach(v => {
+            // eslint-disable-next-line no-unused-vars
+            const { dataKey, ...reset } = v
+            formData[key].push(reset)
+            item.__config__.children.forEach(column => {
+              delete formData[`${v.dataKey}${column.__config__.field}`]
+            })
+          })
+        }
+      })
+
+      return formData
     }
   },
   render(h) {
