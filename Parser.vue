@@ -237,7 +237,7 @@ function formBtns(h) {
     <el-form-item size={this.formConfCopy.size}>
       <el-button type='primary' onClick={this.submitForm}>提交</el-button>
       <el-button onClick={this.resetForm}>重置</el-button>
-      <el-button onClick={() => emit('submit')}>测试提交</el-button>
+      // <el-button onClick={() => emit('submit')}>测试提交</el-button>
     </el-form-item>
   </el-col>
 }
@@ -402,7 +402,6 @@ export default {
     // 钩子触发提交函数
     submitFormHook() {
       return new Promise((resolve, reject) => {
-        console.log(this.$refs[this.formConf.formRef].validate)
         this.$refs[this.formConf.formRef].validate(valid => {
           if (!valid) return reject(false)
           const formData = this.getFormData()
