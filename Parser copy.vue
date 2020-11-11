@@ -1,0 +1,586 @@
+<script>
+import { deepClone, generateUUID } from '@/utils/formGenerator/index'
+import render from '@/components/FormGenerator/render/render.js'
+import { buildHooks } from './parseHooks'
+import graphqlRequest from '@/utils/formGenerator/graphqlRequest'
+import { isNumberStr, isBooleanStr } from '@/utils/formGenerator/index'
+
+const ruleTrigger = {
+  'el-input': 'blur',
+  'el-input-number': 'blur',
+  'el-select': 'change',
+  'el-radio-group': 'change',
+  'el-checkbox-group': 'change',
+  'el-cascader': 'change',
+  'el-time-picker': 'change',
+  'el-date-picker': 'change',
+  'el-rate': 'change'
+}
+
+const components = {
+  tableColgroup(h, currentItem) {
+    const config = currentItem.__config__
+    return (
+      <colgroup>
+        {config.columnWidths.map((item, index) => (
+          <col name={item.field} key={index} width={item.minWidth}/>
+        ))}
+      </colgroup>
+    )
+  }
+}
+
+const layouts = {
+  colFormItem(h, scheme) {
+    const config = scheme.__config__
+    const listeners = buildListeners.call(this, scheme)
+
+    let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
+    if (config.showLabel === false) labelWidth = '0'
+    return (
+      <el-col span={config.span}>
+        <el-form-item label-width={labelWidth} prop={scheme.__vModel__} data-prop={scheme.__vModel__}
+          label={config.showLabel ? config.label : ''}>
+          <render conf={scheme} {...{ on: listeners }} />
+        </el-form-item>
+      </el-col>
+    )
+  },
+  rowFormItem(h, scheme) {
+    let child = renderChildren.apply(this, arguments)
+    if (scheme.type === 'flex') {
+      child = <el-row type={scheme.type} justify={scheme.justify} align={scheme.align}>
+        {child}
+      </el-row>
+    }
+    return (
+      <el-col span={scheme.span}>
+        <el-row gutter={scheme.gutter}>
+          {child}
+        </el-row>
+      </el-col>
+    )
+  },
+
+  table(h, currentItem, index, list, parentList) {
+    const config = currentItem.__config__
+    // console.log([...arguments, currentItem])
+    const child = renderChildren.apply(this, [...arguments, currentItem])
+    return (
+      <el-col span={config.span}>
+        <el-row gutter={config.gutter}>
+          <render key={config.renderKey} conf={currentItem} onInput={ event => {
+            this.$set(config, 'defaultValue', event)
+          }}>
+            {components.tableColgroup.apply(this, arguments)}
+            <tbody>{child}</tbody>
+          </render>
+        </el-row>
+      </el-col>
+    )
+  },
+  trItem(h, currentItem, index, list, parentList, parent) {
+    const config = currentItem.__config__
+    const child = renderChildren.apply(this, arguments)
+    return (
+      <tr label={config.label}>
+        {child}
+      </tr>
+    )
+  },
+
+  tdItem(h, currentItem, index, list, parentList, root, tableRoot) {
+    console.log(tableRoot)
+    const config = currentItem.__config__
+    const child = renderChildren.apply(this, arguments)
+    return (
+      <render key={config.renderKey} conf={currentItem} onInput={ event => {
+        this.$set(config, 'defaultValue', event)
+      }}>
+        <el-row class={'t-cell ' + tableRoot.__config__.columnWidths[index].field} style={{ minWidth: currentItem.colspan > 1 ? tableRoot.__config__.columnWidths[index].minWidth + 'px' : 'auto' }}>
+          {child}
+        </el-row>
+      </render>
+    )
+  },
+  tipFormItem(h, currentItem, index, list) {
+    const config = currentItem.__config__
+    return (
+      <el-col span={config.span}>
+        <render key={config.renderKey} conf={currentItem}>
+          {config.defaultValue}
+        </render>
+      </el-col>
+    )
+  },
+
+  // 渲染业务表格
+  businessTable(h, currentItem, index, list, parentList) {
+    const config = currentItem.__config__
+    const child = renderChildren.apply(this, [...arguments, currentItem])
+    const fieldType = {}
+    config.children.forEach(child => {
+      fieldType[child.__config__.field] = child.__config__.type
+    })
+
+    return (
+      <el-col span={config.span}>
+        <el-row gutter={config.gutter}>
+          <el-row>
+            <div class='actions mb5'>
+              <el-link icon='el-icon-circle-plus-outline' type='primary' onClick={() => {
+                const newItem = deepClone(currentItem.data[currentItem.data.length - 1])
+                for (const [key, val] of Object.entries(newItem)) {
+                  newItem[key] = fieldType[key] === 'default' ? val : ''
+                }
+                newItem.dataKey = generateUUID()
+                currentItem.data.push(newItem)
+              }}>新增</el-link>
+              <el-link icon='el-icon-remove-outline' type='danger' onClick={() => {
+                this.$message.error('测试')
+                this.$confirm('是否删除？')
+                  .then(() => {
+                    this[`multipleSelection${config.renderKey}`].forEach(item => {
+                      const delIndex = currentItem.data.find(v => v.dataKey === item.dataKey)
+                      if (delIndex !== -1) {
+                        currentItem.data.splice(delIndex, 1)
+                      }
+                    })
+                  })
+              }}>删除</el-link>
+            </div>
+            <render key={config.renderKey} conf={currentItem} on-selection-change={(val) => {
+              this[`multipleSelection${config.renderKey}`] = val
+            }}>
+              <el-table-column
+                type='selection'
+                width='55'>
+              </el-table-column>,
+              <el-table-column type='index' width='50' label='序号'></el-table-column>,
+              {child}
+            </render>
+          </el-row>
+        </el-row>
+      </el-col>
+    )
+  },
+  businessTableItem(h, currentItem, index, list, parentList, parent) {
+    const config = currentItem.__config__
+
+    // console.log(currentItem, index, list, parentList, parent)
+    return (
+      h(config.tag, {
+        props: {
+          label: config.label,
+          prop: config.field
+        },
+        scopedSlots: {
+          default: props => {
+            // console.log(this)
+            if (config.type === 'input') {
+              return h('el-form-item', {
+                props: {
+                  labelWidth: '12px',
+                  label: config.required ? ' ' : '',
+                  prop: `${props.row.dataKey}${config.field}`,
+                  required: config.required
+                }
+              }, [
+                h('el-input', {
+                  attrs: {
+                    placeholder: config.placeholder
+                  },
+                  on: {
+                    input: val => {
+                      this[FORM_MODEL][`${props.row.dataKey}${config.field}`] = val
+                      props.row[config.field] = val
+                    }
+                  },
+                  props: {
+                    value: props.row[config.field],
+                    placeholder: config.placeholder
+                  }
+                })
+              ])
+            }
+            return h('span', props.row[config.field])
+          }
+        }
+      })
+    )
+  }
+
+}
+
+function renderFrom(h) {
+  const { formConfCopy } = this
+
+  return (
+    <el-row gutter={formConfCopy.gutter}>
+      <el-form
+        size={formConfCopy.size}
+        label-position={formConfCopy.labelPosition}
+        disabled={formConfCopy.disabled}
+        label-width={`${formConfCopy.labelWidth}px`}
+        ref={formConfCopy.formRef}
+        // model不能直接赋值 https://github.com/vuejs/jsx/issues/49#issuecomment-472013664
+        props={{ model: this[FORM_MODEL] }}
+        rules={this[FORM_RULES]}
+      >
+        {renderFormItem.call(this, h, formConfCopy.fields)}
+        {formConfCopy.formBtns && formBtns.call(this, h)}
+      </el-form>
+    </el-row>
+  )
+}
+
+function formBtns(h) {
+  return <el-col>
+    <el-form-item size={this.formConfCopy.size}>
+      <el-button type='primary' onClick={this.submitForm}>提交</el-button>
+      <el-button onClick={this.resetForm}>重置</el-button>
+    </el-form-item>
+  </el-col>
+}
+
+function renderFormItem(h, elementList, root) {
+  return elementList.map((scheme, i) => {
+    const config = scheme.__config__
+    const layout = layouts[config.layout]
+
+    if (layout) {
+      return layout.call(this, h, scheme, i, root)
+    }
+    throw new Error(`没有与${config.layout}匹配的layout`)
+  })
+}
+
+function renderChildren(h, currentItem, index, list, parentList, parent) {
+  const config = currentItem.__config__
+  if (!Array.isArray(config.children)) return null
+  return config.children.map((el, i) => {
+    const layout = layouts[el.__config__.layout]
+    if (layout) {
+      return layout.call(this, h, el, i, config.children, list, parentList, parent)
+    }
+    return layoutIsNotFound.call(this)
+  })
+}
+
+function layoutIsNotFound() {
+  throw new Error(`没有与${this.currentItem.__config__.layout}匹配的layout`)
+}
+
+function setValue(event, config, scheme) {
+  this.$set(config, 'defaultValue', event)
+  this.$set(this[FORM_MODEL], scheme.__vModel__, event)
+}
+
+function buildListeners(scheme) {
+  const config = scheme.__config__
+  const methods = this.formConf.__methods__ || {}
+  const listeners = {}
+
+  // 给__methods__中的方法绑定this和event
+  Object.keys(methods).forEach(key => {
+    listeners[key] = event => methods[key].call(this, event)
+  })
+  // 响应 render.js 中的 vModel $emit('input', val)
+  listeners.input = event => setValue.call(this, event, config, scheme)
+
+  return listeners
+}
+let self = null
+const FORM_MODEL = 'elForm'
+const FORM_RULES = 'rules'
+
+export default {
+  name: 'Parser',
+  components: {
+    render
+  },
+  props: {
+    formConf: {
+      type: Object,
+      required: true
+    },
+    config: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  data() {
+    const data = {
+      formConfCopy: deepClone(this.formConf),
+      [FORM_MODEL]: {},
+      [FORM_RULES]: {}
+    }
+    self = this
+    if (this.formConf && this.formConf.fields) {
+      this.formConf.fields.forEach(field => {
+        if (field.__config__.layout === 'businessTable' && field.__config__.tableType === 'multipleTable') {
+          data[`multipleSelection${field.__config__.renderKey}`] = []
+        }
+      })
+    }
+    if (Object.keys(data.formConfCopy).length === 0) {
+      data.formConfCopy = {
+        disabled: false,
+        fields: [],
+        formBtns: true,
+        gutter: 15,
+        labelPosition: 'right',
+        labelWidth: 100,
+        size: 'mini',
+        span: 24
+      }
+    }
+
+    this.buildRules(data.formConfCopy.fields, data[FORM_RULES])
+    this.initFormData(data.formConfCopy.fields, data[FORM_MODEL])
+    return data
+  },
+  watch: {
+    formConf: {
+      deep: true,
+      immutable: true,
+      handler(data) {
+        self.formConfCopy = deepClone(data || {})
+        if (Object.keys(self.formConfCopy).length === 0) {
+          self.formConfCopy = {
+            disabled: false,
+            fields: [],
+            formBtns: true,
+            gutter: 15,
+            labelPosition: 'right',
+            labelWidth: 100,
+            size: 'mini',
+            span: 24
+          }
+        }
+        self.buildRules(self.formConfCopy.fields, self[FORM_RULES])
+        self.initFormData(self.formConfCopy.fields, self[FORM_MODEL])
+        self.setForm()
+      }
+    },
+    config: {
+      deep: true,
+      handler: config => {
+        this.setForm()
+      }
+    }
+  },
+  created() {
+    // this.$set(this.$data, 'config', {})
+    console.log(this)
+    if (Object.keys(this.formConfCopy).length > 0) {
+      buildHooks(this)
+      this.setForm()
+      this.getDynamicData(this.formConfCopy.fields)
+    }
+  },
+  mounted() {
+  },
+  methods: {
+    // 设置表单状态
+    setForm() {
+      if (Object.keys(this.config).length === 0) return
+      this.formConfCopy = { ...this.formConfCopy, ...this.config }
+    },
+
+    // 处理数据
+    getDynamicData(componentList) {
+      console.log(componentList)
+      componentList.forEach(component => {
+        const config = component.__config__
+        if (config.dataType === 'dynamic') {
+          this.fetchData(component)
+        }
+        // if (config.children) this.getDynamicData(config.children)
+      })
+    },
+
+    fetchData(component) {
+      const { dataType, url, defaultParams, dependencies, dataFields } = component.__config__
+      if (dataType === 'dynamic' && url) {
+        const params = {}
+        const paramsStrArr = []
+        let dataFieldStr = ''
+        // 默认参数
+        if (defaultParams) {
+          defaultParams.forEach(item => {
+            params[item.field] = item.value
+          })
+        }
+        // 自定义依赖参数
+        if (dependencies) {
+          const formData = this.getFormData(this.drawingList)
+          dependencies.forEach(field => {
+            !!field && (params[field] = formData[field])
+          })
+        }
+        for (const [key, value] of Object.entries(params)) {
+          !!key && paramsStrArr.push(`${key}:${isNumberStr(value) || isBooleanStr(value) ? value : `"${value}"`}`)
+        }
+        // 返回字段
+        if (dataFields) {
+          dataFieldStr = dataFields.map(item => item.field).join(',')
+        }
+
+        const paramsStr = paramsStrArr.length > 0 ? `(${paramsStrArr.join(',')})` : ''
+
+        const query = `{
+            ${url}${paramsStr} {
+              ${dataFieldStr}
+            }
+          }`
+        this.setLoading(component, true)
+        graphqlRequest({
+          url: '/graphql',
+          method: 'POST',
+          data: JSON.stringify({
+            query
+          })
+        }).then(resp => {
+          console.log(resp)
+          this.setLoading(component, false)
+          this.setRespData(component, resp.data.data)
+        })
+      }
+    },
+
+    setRespData(component, respData) {
+      const { url, renderKey, dataConsumer } = component.__config__
+      if (!url || !dataConsumer) return
+      const data = url.split('.').reduce((pre, item) => pre[item], respData)
+      this.setObjectValueByStringKeys(component, dataConsumer, data)
+      const i = this.formConfCopy.fields.findIndex(item => item.__config__.renderKey === renderKey)
+      if (i > -1) this.$set(this.formConfCopy.fields, i, component)
+    },
+    setObjectValueByStringKeys(obj, strKeys, val) {
+      const arr = strKeys.split('.')
+      arr.reduce((pre, item, i) => {
+        if (arr.length === i + 1) {
+          pre[item] = val
+        } else if (Object.prototype.toString.call(pre[item]) !== '[Object Object]') {
+          pre[item] = {}
+        }
+        return pre[item]
+      }, obj)
+    },
+    setLoading(component, val) {
+      const { directives } = component
+      if (Array.isArray(directives)) {
+        const t = directives.find(d => d.name === 'loading')
+        if (t) t.value = val
+      }
+    },
+
+    initFormData(componentList, formData) {
+      componentList.forEach(cur => {
+        const config = cur.__config__
+
+        if (config.componentName === 'business-table') {
+          cur.data.forEach(item => {
+            config.children.forEach(column => {
+              if (column.__config__.type !== 'default') {
+                formData[item.dataKey + column.__config__.field] = item[column.__config__.field]
+              }
+            })
+          })
+          return
+        }
+        if (cur.__vModel__) formData[cur.__vModel__] = config.defaultValue
+        if (config.children) this.initFormData(config.children, formData)
+      })
+    },
+    buildRules(componentList, rules) {
+      componentList.forEach(cur => {
+        const config = cur.__config__
+        // 业务组件
+
+        if (config.componentName === 'business-table') {
+          cur.data.forEach(item => {
+            config.children.forEach(column => {
+              if (column.__config__.required) {
+                const required = { required: column.__config__.required, message: cur.placeholder, trigger: 'blur' }
+                required.message === undefined && (required.message = `${column.__config__.label}不能为空`)
+                rules[item.dataKey + column.__config__.field] = [required]
+              }
+            })
+          })
+          return
+        }
+
+        if (Array.isArray(config.regList)) {
+          if (config.required) {
+            const required = { required: config.required, message: cur.placeholder }
+            if (Array.isArray(config.defaultValue)) {
+              required.type = 'array'
+              required.message = `请至少选择一个${config.label}`
+            }
+            required.message === undefined && (required.message = `${config.label}不能为空`)
+            config.regList.push(required)
+          }
+          rules[cur.__vModel__] = config.regList.map(item => {
+            // eslint-disable-next-line no-eval
+            item.pattern && (item.pattern = eval(item.pattern))
+            item.trigger = ruleTrigger && ruleTrigger[config.tag]
+            return item
+          })
+        }
+        if (config.children) this.buildRules(config.children, rules)
+      })
+    },
+    resetForm() {
+      this.formConfCopy = deepClone(this.formConf)
+      this.$refs[this.formConf.formRef].resetFields()
+    },
+    // 钩子触发提交函数
+    submitFormHook() {
+      return new Promise((resolve, reject) => {
+        this.$refs[this.formConf.formRef].validate(valid => {
+          if (!valid) return reject(false)
+          const formData = this.getFormData()
+          resolve(formData)
+          return true
+        })
+      })
+    },
+    // 普通提交
+    submitForm() {
+      this.$refs[this.formConf.formRef].validate(valid => {
+        if (!valid) return
+        const formData = this.getFormData()
+        // 触发sumit事件
+        this.$emit('submit', formData)
+        return true
+      })
+    },
+    getFormData() {
+      // 处理数据
+      const formData = deepClone(this[FORM_MODEL])
+      // 业务表格
+      this.formConfCopy.fields.forEach(item => {
+        if (item.__config__.layout === 'businessTable') {
+          const key = item.__vModel__
+          formData[key] = []
+          item.data.forEach(v => {
+            // eslint-disable-next-line no-unused-vars
+            const { dataKey, ...reset } = v
+            formData[key].push(reset)
+            item.__config__.children.forEach(column => {
+              delete formData[`${v.dataKey}${column.__config__.field}`]
+            })
+          })
+        }
+      })
+      return formData
+    }
+  },
+  render(h) {
+    console.log(222)
+    return renderFrom.call(this, h)
+  }
+}
+</script>

@@ -40,6 +40,7 @@ export const emit = event => new Promise((resolve, reject) => {
     // 触发提交
     case 'submit':
       {
+        console.log(componentList)
         // eslint-disable-next-line no-useless-call
         const promiseArr = componentList.map(component => component.submitFormHook.call(component))
         Promise.all(promiseArr)
