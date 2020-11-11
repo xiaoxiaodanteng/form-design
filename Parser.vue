@@ -237,7 +237,6 @@ function formBtns(h) {
     <el-form-item size={this.formConfCopy.size}>
       <el-button type='primary' onClick={this.submitForm}>提交</el-button>
       <el-button onClick={this.resetForm}>重置</el-button>
-      // <el-button onClick={() => emit('submit')}>测试提交</el-button>
     </el-form-item>
   </el-col>
 }
@@ -299,6 +298,10 @@ export default {
     formConf: {
       type: Object,
       required: true
+    },
+    config: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
@@ -328,16 +331,29 @@ export default {
         self.formConfCopy = deepClone(data)
         self.initFormData(self.formConfCopy.fields, self[self.formConf.formModel])
         self.buildRules(self.formConfCopy.fields, self[self.formConf.formRules])
+        self.setForm()
+      }
+    },
+    config: {
+      deep: true,
+      handler: config => {
+        this.setForm()
       }
     }
   },
   created() {
     buildHooks(this)
+    this.setForm()
   },
   mounted() {
     console.log(this.rules, this.formData)
   },
   methods: {
+    // 设置表单状态
+    setForm() {
+      if (Object.keys(this.config).length === 0) return
+      this.formConfCopy = { ...this.formConfCopy, ...this.config }
+    },
     initFormData(componentList, formData) {
       componentList.forEach(cur => {
         const config = cur.__config__
@@ -426,7 +442,7 @@ export default {
       // 业务表格
       this.formConfCopy.fields.forEach(item => {
         if (item.__config__.layout === 'businessTable') {
-          const key = item.__config__.field
+          const key = item.__vModel__
           formData[key] = []
           item.data.forEach(v => {
             // eslint-disable-next-line no-unused-vars
