@@ -2,8 +2,8 @@
 import { deepClone, generateUUID } from '@/utils/formGenerator/index'
 import render from '@/components/FormGenerator/render/render.js'
 import { buildHooks } from './parseHooks'
-// import graphqlRequest from '@/utils/formGenerator/graphqlRequest'
-// import { isNumberStr, isBooleanStr } from '@/utils/formGenerator/index'
+import graphqlRequest from './graphqlRequest'
+import { isNumberStr, isBooleanStr } from '@/utils/formGenerator/index'
 
 const ruleTrigger = {
   'el-input': 'blur',
@@ -360,28 +360,50 @@ export default {
         }
         self.buildRules(self.formConfCopy.fields, self[FORM_RULES])
         self.initFormData(self.formConfCopy.fields, self[FORM_MODEL])
-        // self.setForm()
+        self.setForm()
       }
     },
     config: {
       deep: true,
       handler: config => {
-        // this.setForm()
+        this.setForm()
+      }
+    },
+    [FORM_MODEL]: {
+      deep: true,
+      immutable: true,
+      handler() {
+        this.$emit('input', this.getFormData())
       }
     }
   },
   created() {
-    // this.$set(this.$data, 'config', {})
-    console.log(this)
     if (Object.keys(this.formConfCopy).length > 0) {
       buildHooks(this)
-      // this.setForm()
-      // this.getDynamicData(this.formConfCopy.fields)
+      this.setForm()
+      this.getDynamicData(this.formConfCopy.fields)
     }
   },
   mounted() {
   },
   methods: {
+    // 设置表单状态
+    setForm() {
+      if (Object.keys(this.config).length === 0) return
+      this.formConfCopy = { ...this.formConfCopy, ...this.config }
+    },
+
+    // 处理数据
+    getDynamicData(componentList) {
+      console.log(componentList)
+      componentList.forEach(component => {
+        const config = component.__config__
+        if (config.dataType === 'dynamic') {
+          this.fetchData(component)
+        }
+        if (config.children) this.getDynamicData(config.children)
+      })
+    },
 
     initFormData(componentList, formData) {
       componentList.forEach(cur => {
@@ -483,10 +505,84 @@ export default {
         }
       })
       return formData
+    },
+
+    fetchData(component) {
+      const { dataType, url, defaultParams, dependencies, dataFields } = component.__config__
+      if (dataType === 'dynamic' && url) {
+        const params = {}
+        const paramsStrArr = []
+        let dataFieldStr = ''
+        // 默认参数
+        if (defaultParams) {
+          defaultParams.forEach(item => {
+            params[item.field] = item.value
+          })
+        }
+        // 自定义依赖参数
+        if (dependencies) {
+          const formData = this.getFormData(this.drawingList)
+          dependencies.forEach(field => {
+            !!field && (params[field] = formData[field])
+          })
+        }
+        for (const [key, value] of Object.entries(params)) {
+          !!key && paramsStrArr.push(`${key}:${isNumberStr(value) || isBooleanStr(value) ? value : `"${value}"`}`)
+        }
+        // 返回字段
+        if (dataFields) {
+          dataFieldStr = dataFields.map(item => item.field).join(',')
+        }
+
+        const paramsStr = paramsStrArr.length > 0 ? `(${paramsStrArr.join(',')})` : ''
+
+        const query = `{
+            ${url}${paramsStr} {
+              ${dataFieldStr}
+            }
+          }`
+        this.setLoading(component, true)
+        graphqlRequest({
+          url: '/graphql',
+          method: 'POST',
+          data: JSON.stringify({
+            query
+          })
+        }).then(resp => {
+          console.log(resp)
+          this.setLoading(component, false)
+          this.setRespData(component, resp.data.data)
+        })
+      }
+    },
+    setRespData(component, respData) {
+      const { url, renderKey, dataConsumer } = component.__config__
+      if (!url || !dataConsumer) return
+      const data = url.split('.').reduce((pre, item) => pre[item], respData)
+      this.setObjectValueByStringKeys(component, dataConsumer, data)
+      const i = this.formConfCopy.fields.findIndex(item => item.__config__.renderKey === renderKey)
+      if (i > -1) this.$set(this.formConfCopy.fields, i, component)
+    },
+    setObjectValueByStringKeys(obj, strKeys, val) {
+      const arr = strKeys.split('.')
+      arr.reduce((pre, item, i) => {
+        if (arr.length === i + 1) {
+          pre[item] = val
+        } else if (Object.prototype.toString.call(pre[item]) !== '[Object Object]') {
+          pre[item] = {}
+        }
+        return pre[item]
+      }, obj)
+    },
+    setLoading(component, val) {
+      const { directives } = component
+      if (Array.isArray(directives)) {
+        const t = directives.find(d => d.name === 'loading')
+        if (t) t.value = val
+      }
     }
   },
   render(h) {
-    console.log(222)
     return renderFrom.call(this, h)
   }
 }

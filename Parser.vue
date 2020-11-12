@@ -1,6 +1,7 @@
 <template>
   <parser-com
     v-if="isShowParser"
+    v-model="formDataModel"
     :form-conf="formConf"
     :config="config"
     @submit="onSubmit"
@@ -20,11 +21,23 @@ export default {
     config: {
       type: Object,
       default: () => ({})
+    },
+    value: {
+      type: Object,
+      default: () => ({})
     }
   },
   computed: {
     isShowParser() {
       return Object.keys(this.formConf).length > 0
+    },
+    formDataModel: {
+      get() {
+        return this.value
+      },
+      set(value) {
+        this.$emit('input', value)
+      }
     }
   },
   methods: {

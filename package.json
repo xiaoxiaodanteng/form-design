@@ -13,5 +13,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "homepage": "https://github.com/xiaoxiaodanteng/form-parser"
+  "homepage": "https://github.com/xiaoxiaodanteng/form-parser",
+  "dependencies": {
+    "axios": "^0.21.0"
+  }
 }
