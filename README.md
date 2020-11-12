@@ -29,7 +29,7 @@ config = {
   span: 24
 }  
 
-<parser :form-conf="formJson" :config="config" @submit="sumbitForm" />
+<parser v-mode="formData" :form-conf="formJson" :config="config" @submit="sumbitForm" />
 ```
 
 # 示例
