@@ -24,7 +24,12 @@ const layouts = {
   elementLayoutTable: (h, currentItem, index) => <elementLayoutTable scheme={currentItem} index={index}/>,
 
   colFormItem(h, scheme) {
-    return <colFormItem scheme={scheme}/>
+    // return <colFormItem scheme={scheme}/>
+    return h('colFormItem', {
+      attrs: {
+        scheme
+      }
+    })
   },
   rowFormItem: (h, scheme) => <rowFormItem scheme={scheme}/>,
 

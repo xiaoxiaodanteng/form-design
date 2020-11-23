@@ -1,11 +1,11 @@
 <script>
 import render from '@/components/FormGenerator/render/render.js'
-// import customScript from '../mixins/customScript'
-// import componentMixin from '../mixins/componentMixin'
+import customScript from '../mixins/customScript'
+import componentMixin from '../mixins/componentMixin'
 
 export default {
   components: { render },
-  // mixins: [customScript, componentMixin],
+  mixins: [customScript, componentMixin],
   props: {
     scheme: {
       type: Object,
