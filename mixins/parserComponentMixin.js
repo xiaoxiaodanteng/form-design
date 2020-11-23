@@ -2,6 +2,8 @@ import elementDynamicTable from '../components/elementDynamicTable.vue'
 import elementStaticTable from '../components/elementStaticTable.vue'
 import elementLayoutTable from '../components/elementLayoutTable.vue'
 import colFormItem from '../components/colFormItem'
+import tipFormItem from '../components/tipFormItem'
+import uploadTable from '../components/uploadTable'
 import rowFormItem from '../components/rowFormItem'
 import { deepClone, generateUUID } from '@/utils/formGenerator/index'
 
@@ -270,7 +272,9 @@ export default {
     elementStaticTable,
     elementLayoutTable,
     colFormItem,
-    rowFormItem
+    tipFormItem,
+    rowFormItem,
+    uploadTable
   },
   methods: {
     renderFormItem(h, elementList, root) {
