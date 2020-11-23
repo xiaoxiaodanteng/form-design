@@ -4,6 +4,7 @@ import customScript from '@/components/FormGenerator/parser/mixins/customScript'
 import componentMixin from '@/components/FormGenerator/parser/mixins/componentMixin'
 
 export default {
+  name: 'elementDynamicTable',
   components: { render },
   mixins: [
     customScript,

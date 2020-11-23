@@ -6,6 +6,7 @@ import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
+  name: 'colFormItem',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {

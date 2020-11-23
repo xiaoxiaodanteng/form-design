@@ -4,6 +4,7 @@ import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
+  name: 'rowFormItem',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {

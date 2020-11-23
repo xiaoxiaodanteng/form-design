@@ -26,7 +26,6 @@ const layouts = {
   elementLayoutTable: (h, currentItem, index) => h('elementLayoutTable', { props: { scheme: currentItem, index }}),
 
   colFormItem(h, scheme) {
-    // return <colFormItem scheme={scheme}/>
     return h('colFormItem', {
       props: {
         scheme

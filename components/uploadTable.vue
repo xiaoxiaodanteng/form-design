@@ -5,6 +5,7 @@ import componentMixin from '../mixins/componentMixin'
 import { parseTime } from '@/utils/index.js'
 
 export default {
+  name: 'uploadTable',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {
