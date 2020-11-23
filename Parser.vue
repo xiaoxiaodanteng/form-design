@@ -41,6 +41,9 @@ export default {
       }
     }
   },
+  created() {
+    console.log(this)
+  },
   methods: {
     onSubmit(data) {
       this.$emit('submit', data)

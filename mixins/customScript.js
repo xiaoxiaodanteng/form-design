@@ -74,7 +74,6 @@ export default {
     },
     getHookStr(code) {
       const ast = parse(code)
-      // console.log(ast)
       // 转换变量信息
       traverse(ast, {
         enter(path) {
