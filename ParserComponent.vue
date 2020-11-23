@@ -88,7 +88,6 @@ export default {
     }
     this.initFormData(data.formConfCopy.fields, data[FORM_MODEL])
     this.buildRules(data.formConfCopy.fields, data[FORM_RULES])
-    console.log(this)
     return data
   },
   watch: {
@@ -140,7 +139,6 @@ export default {
     }
   },
   created() {
-    console.log(this)
     if (Object.keys(this.formConfCopy).length > 0) {
       // 全局钩子
       buildHooks(this)
