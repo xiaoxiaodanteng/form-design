@@ -2,6 +2,7 @@
   <parser-com
     v-if="isShowParser"
     v-model="formDataModel"
+    v-bind="$attrs"
     :form-conf="formConf"
     :config="config"
     @submit="onSubmit"
