@@ -94,8 +94,8 @@ export default {
                 default({ row, $index }) {
                   // scheme.data.forEach(item => console.log(item, row))
                   return (
-
-                    childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : <span>{row[childConfig.field]}</span>
+                    111
+                    // childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : <span>{row[childConfig.field]}</span>
                   )
                 },
                 header({ column }) {
