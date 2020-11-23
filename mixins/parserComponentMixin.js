@@ -19,19 +19,19 @@ const componentList = {
 }
 
 const layouts = {
-  elementDynamicTable: (h, currentItem, index) => <elementDynamicTable scheme={currentItem} index={index}/>,
-  elementStaticTable: (h, currentItem, index) => <elementStaticTable scheme={currentItem} index={index}/>,
-  elementLayoutTable: (h, currentItem, index) => <elementLayoutTable scheme={currentItem} index={index}/>,
+  elementDynamicTable: (h, currentItem, index) => h('elementDynamicTable', { props: { scheme: currentItem, index }}),
+  elementStaticTable: (h, currentItem, index) => h('elementStaticTable', { props: { scheme: currentItem, index }}),
+  elementLayoutTable: (h, currentItem, index) => h('elementLayoutTable', { props: { scheme: currentItem, index }}),
 
   colFormItem(h, scheme) {
     // return <colFormItem scheme={scheme}/>
     return h('colFormItem', {
-      attrs: {
+      props: {
         scheme
       }
     })
   },
-  rowFormItem: (h, scheme) => <rowFormItem scheme={scheme}/>,
+  rowFormItem: (h, scheme) => h('rowFormItem', { props: { scheme }}),
 
   table(h, currentItem, index, list, parentList) {
     const config = currentItem.__config__
