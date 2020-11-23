@@ -1,11 +1,3 @@
-<template>
-  <el-col :span='config.span' v-if="config.show">
-    <el-form-item :label-width="labelWidth" :prop="scheme.__vModel__" :data-prop="scheme.__vModel__"
-      :label="config.showLabel ? config.label : ''" :rules="scheme.rules || {}">
-      <render :conf="scheme" v-bind="{...{ on: listeners }}" />
-    </el-form-item>
-  </el-col>
-</template>
 
 <script>
 
@@ -28,6 +20,7 @@ export default {
       return this.scheme.__config__
     },
     listeners() {
+      console.log(this.parser.buildListeners(this.scheme))
       return this.parser.buildListeners(this.scheme)
     },
     labelWidth() {
@@ -54,6 +47,32 @@ export default {
       return component
     }
   },
+  render(h) {
+    const config = this.scheme.__config__
+    if (!config.show) return null
+    const listeners = this.parser.buildListeners(this.scheme)
+    let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
+    if (config.showLabel === false) labelWidth = '0'
+
+    return h('el-col', {
+      attrs: {
+        span: config.span
+      }
+    }, [h('el-form-item', {
+      attrs: {
+        labelWidth,
+        prop: this.scheme.__vModel__,
+        label: config.showLabel ? config.label : ''
+      }
+    }, [
+      h('render', {
+        props: {
+          conf: this.scheme
+        },
+        on: listeners
+      })
+    ])])
+  }
   // render(h) {
   //   const config = this.scheme.__config__
   //   const listeners = this.parser.buildListeners(this.scheme)
