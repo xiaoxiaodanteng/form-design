@@ -1,4 +1,14 @@
+<template>
+  <el-col :span='config.span' v-if="config.show">
+    <el-form-item :label-width="labelWidth" :prop="scheme.__vModel__" :data-prop="scheme.__vModel__"
+      :label="config.showLabel ? config.label : ''" :rules="scheme.rules || {}">
+      <render :conf="scheme" v-bind="{...{ on: listeners }}" />
+    </el-form-item>
+  </el-col>
+</template>
+
 <script>
+
 import render from '@/components/FormGenerator/render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
@@ -13,6 +23,17 @@ export default {
     }
   },
   inject: ['formData', 'parser'],
+  computed: {
+    config() {
+      return this.scheme.__config__
+    },
+    listeners() {
+      return this.parser.buildListeners(this.scheme)
+    },
+    labelWidth() {
+      return this.config.labelWidth ? `${this.config.showLabel?this.config.labelWidth : 0}px` : null
+    }
+  },
   created() {
   },
   mounted() {
@@ -33,19 +54,19 @@ export default {
       return component
     }
   },
-  render(h) {
-    const config = this.scheme.__config__
-    const listeners = this.parser.buildListeners(this.scheme)
-    let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
-    if (config.showLabel === false) labelWidth = '0'
-    return (
-      config.show ? <el-col span={config.span}>
-        <el-form-item label-width={labelWidth} prop={this.scheme.__vModel__} data-prop={this.scheme.__vModel__}
-          label={config.showLabel ? config.label : ''} rules={this.scheme.rules || {}}>
-          <render conf={this.scheme} {...{ on: listeners }} />
-        </el-form-item>
-      </el-col> : null
-    )
-  }
+  // render(h) {
+  //   const config = this.scheme.__config__
+  //   const listeners = this.parser.buildListeners(this.scheme)
+  //   let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
+  //   if (config.showLabel === false) labelWidth = '0'
+  //   return (
+  //     config.show ? <el-col span={config.span}>
+  //       <el-form-item label-width={labelWidth} prop={this.scheme.__vModel__} data-prop={this.scheme.__vModel__}
+  //         label={config.showLabel ? config.label : ''} rules={this.scheme.rules || {}}>
+  //         <render conf={this.scheme} {...{ on: listeners }} />
+  //       </el-form-item>
+  //     </el-col> : null
+  //   )
+  // }
 }
 </script>
