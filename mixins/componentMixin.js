@@ -2,7 +2,7 @@ export default {
 
   methods: {
 
-    fbuildListeners(scheme) {
+    buildListeners(scheme) {
       const config = scheme.__config__
       const methods = this.parser.formConf.__methods__ || {}
       const listeners = {}
