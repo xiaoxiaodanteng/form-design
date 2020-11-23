@@ -37,14 +37,13 @@ export default {
     if (!this.scheme) return null
     const scheme = this.scheme
     const config = this.scheme.__config__
-    const listeners = this.parser.buildListeners(scheme)
+    // const listeners = this.parser.buildListeners(scheme)
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     if (config.showLabel === false) labelWidth = '0'
     return (
       config.show ? <el-col span={config.span}>
         <el-form-item label-width={labelWidth} prop={scheme.__vModel__} data-prop={scheme.__vModel__}
           label={config.showLabel ? config.label : ''} rules={scheme.rules || {}}>
-          <render conf={scheme} {...{ on: listeners }} />
         </el-form-item>
       </el-col> : null
     )
