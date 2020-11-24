@@ -1,7 +1,6 @@
 import { parse, parseExpression } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generator from '@babel/generator'
-import { debounce } from 'throttle-debounce'
 import * as t from '@babel/types'
 
 // 钩子函数
@@ -10,11 +9,7 @@ import * as t from '@babel/types'
 //   created: 'created',
 //   mounted: 'mounted'
 // }
-// 自身方法
-const selfMethodMap = {
-  'fn_summary-method': 'summary-method',
-  'fn_span-method': 'span-method'
-}
+
 const componentConfigAttrs = [
   'required',
   'show',
@@ -34,34 +29,14 @@ export default {
 
   },
   computed: {
-    // 为了监听自定义脚本值变化
-    selfMethodCodeIsChange() {
-      let codeStr = ''
-      for (const [key] of Object.entries(selfMethodMap)) {
-        if (this.scheme[key] !== undefined) codeStr += this.scheme[key]
-      }
-      return codeStr
-    },
-
-    componentValue() {
-      if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
-      return this.scheme.__config__.defaultValue
-    }
-  },
-  watch: {
-    // 监听自定义脚本是否变化
-    selfMethodCodeIsChange(val) {
-      this.initComponentScript()
-    },
-    componentValue(val) {
-      debounce(340, this.runHook('watch'))
-    }
   },
   created() {
-    this.initComponentFieldMaps(this.parser.formConfCopy && this.parser.formConfCopy.fields || this.parser.drawingList, this.componentFieldMaps)
+    this.initComponentFieldMaps(this.formConfCopy.fields, this.componentFieldMaps)
     // 初始化自定义脚本事件
-    this.initComponentScript()
     this.runHook('created')
+  },
+  mounted() {
+    this.runHook('mounted')
   },
   methods: {
     initComponentFieldMaps(componentList, maps) {
@@ -86,25 +61,16 @@ export default {
       resultStr = testStr.replace(/[\r\n]/g, '') // 去掉回车换行
       return resultStr
     },
-    initComponentScript() {
-      // console.log(parse(`function(params) {
-      //   console.log(params);
-      // }`))
-      for (const [key, value] of Object.entries(this.scheme)) {
-        if (key.indexOf('fn_') !== -1) {
-          if (this.iGetInnerText(value)) {
-            let fn
-            // eslint-disable-next-line no-eval
-            eval(`fn = ${value}`)
-            this.scheme[key.replace('fn_', '')] = fn
-          }
-        }
-      }
-      // console.log(this.scheme)
+    // 执行钩子
+    runHook(type) {
+      const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
+      if (!code) return
+      const fnStr = this.getHookStr(code)
+
+      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVal || {})
     },
     getHookStr(code) {
       const ast = parse(code)
-      console.log(ast)
       // 转换变量信息
       traverse(ast, {
         enter(path) {
@@ -123,23 +89,6 @@ export default {
         },
         MemberExpression(path) {
           const { node } = path
-          if (node.object.name === '$this') {
-            // 改变form value值
-            if (node.property.name === 'value') {
-              // 替换
-              path.replaceWith(
-                parseExpression('$form[$this.__vModel__]')
-              )
-            }
-            // 改变自身值
-            if (node.property.name === 'required') {
-              node.name = '$this.__config__.required'
-            }
-            // 更改config上的值
-            componentConfigAttrs.includes(node.property.name) && path.replaceWith(
-              parseExpression(`$this.__config__.${node.property.name}`)
-            )
-          }
 
           // 全局变量
           if (node.object.name === '$props') {
@@ -183,13 +132,7 @@ export default {
 
       return generator(ast).code
     },
-    // 执行钩子
-    runHook(type) {
-      const code = this.iGetInnerText(this.scheme[`__${type}__`])
-      if (!code) return
-      const fnStr = this.getHookStr(code)
-      this.hookHandler(fnStr, this.scheme, this.formData, this.parser.$attrs.globalVal || {})
-    },
+
     hookHandler(code, $this, $form, $props) {
       try {
         // eslint-disable-next-line no-eval
@@ -203,21 +146,7 @@ export default {
     },
     // 获取组件数据
     getComponentByField(field) {
-      return this.handleGetComponent(this.parser.formConfCopy.fields, field)
-    },
-    handleGetComponent(componentList, field) {
-      let component = null
-      for (let i = 0; i < componentList.length; i++) {
-        const com = componentList[i]
-        if (com.__vModel__ === field) {
-          component = com
-        } else {
-          if (com.__config__.children) {
-            component = this.handleGetComponent(com.__config__.children, field)
-          }
-        }
-      }
-      return component
+      return this.componentFieldMaps[field]
     }
   }
 }

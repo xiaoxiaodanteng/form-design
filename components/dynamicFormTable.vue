@@ -108,6 +108,7 @@ export default {
 
           // 列
           [...this.scheme.__config__.children.map((child, index) => {
+            console.log(child)
             const { __config__: childConfig, ...attrs } = child
             return childConfig.show ? h('el-table-column', {
               props: {

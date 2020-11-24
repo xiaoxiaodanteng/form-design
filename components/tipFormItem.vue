@@ -4,7 +4,7 @@ import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
-  name: 'tipFormItem',
+  name: 'TipFormItem',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {

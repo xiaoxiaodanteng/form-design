@@ -4,7 +4,7 @@ import customScript from '@/components/FormGenerator/parser/mixins/customScript'
 import componentMixin from '@/components/FormGenerator/parser/mixins/componentMixin'
 
 export default {
-  name: 'elementLayoutTable',
+  name: 'ElementLayoutTable',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {
@@ -36,35 +36,61 @@ export default {
     const scheme = this.scheme
     const config = this.scheme.__config__
     const self = this
-    return (
-      <el-col span={config.span}>
-        <el-row class='row' >
-          <render key={config.renderKey} props={{
-            'headerCellStyle': {
-              background: config.headerColor
-            }
-          }} conf={scheme}
-          on-current-change={val => {
+    if (!config.show) return null
+    return h('el-col', {
+      attrs: { span: config.span }
+    }, [h('el-row', { class: 'row' }, [
+      h('render', {
+        props: {
+          conf: scheme
+        },
+        on: {
+          currentChange: (val) => {
             this.currentRow = val
-          }}
-          >
-            {this.scheme.__config__.children.map((child, index) => {
-              const { __config__: childConfig, ...attrs } = child
-              return childConfig.show ? <el-table-column column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
-                default({ row, $index }) {
-                  return (
-                    <el-row>
-                      {row[childConfig.field].__config__.children.length === 0 ? <div class='showValue'>{row[childConfig.field].__config__.defaultValue}</div> : self.parser.renderChildren(h, row[childConfig.field], index)}
-                    </el-row>
-                  )
-                }
-              }} props={{ ...attrs }}>
-              </el-table-column> : null
-            })}
-          </render>
-        </el-row>
-      </el-col>
-    )
+          }
+        }
+      }, [
+        // 多选
+        config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0
+          ? h('el-table-column', {
+            attrs: {
+              type: 'selection',
+              align: 'center',
+              width: '55px'
+            }
+          }) : null,
+        // 显示序号
+
+        config.showIndex ? h('el-table-column', {
+          attrs: {
+            type: 'index',
+            align: 'center',
+            width: '50px',
+            label: '序号'
+          }
+        }) : null,
+
+        // 列
+        [...this.scheme.__config__.children.map((child, index) => {
+          const { __config__: childConfig, ...attrs } = child
+          return childConfig.show ? h('el-table-column', {
+            props: {
+              ...attrs,
+              columnKey: `${index}`,
+              label: childConfig.label,
+              prop: childConfig.field
+            },
+            scopedSlots: {
+              default: ({ row, $index }) => {
+                return row[childConfig.field].__config__.children.length > 0 ? self.parser.renderChildren(h, row[childConfig.field], index) : h('span', {}, row[childConfig.field].__config__.defaultValue)
+              },
+              header: ({ column }) => h('span', {}, column.label)
+            }
+          }, []) : null
+        })]
+      ])
+    ])
+    ])
   }
 }
 </script>

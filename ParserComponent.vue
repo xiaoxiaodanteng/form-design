@@ -8,6 +8,7 @@ import componentBuildHooks from '@/utils/formGenerator/hooks'
 // import { isNumberStr, isBooleanStr } from '@/utils/formGenerator/index'
 
 import parserComponentMixin from './mixins/parserComponentMixin'
+import parserCustomScript from './mixins/parserCustomScript'
 const ruleTrigger = {
   'el-input': 'blur',
   'el-input-number': 'blur',
@@ -28,7 +29,7 @@ export default {
   components: {
     render
   },
-  mixins: [__method__, parserComponentMixin],
+  mixins: [__method__, parserComponentMixin, parserCustomScript],
   props: {
     formConf: {
       type: Object,
@@ -133,8 +134,9 @@ export default {
       handler(formData) {
         this.parserFormData = formData
         // 处理自定义禁用事件
-        // this.disposeCustomDisabledComponent()
+        this.disposeCustomDisabledComponent()
         this.$emit('input', this.getFormData())
+        this.runHook('watch')
       }
     }
   },
@@ -184,6 +186,14 @@ export default {
           componentBuildHooks(component)
         }
         if (component.__config__ && component.__config__.children) this.bindComponentsHook(component.__config__.children)
+        if (component.data && component.__config__.tableType === 'layout') {
+          component.data.forEach(v => {
+            // eslint-disable-next-line no-unused-vars
+            for (const [key, value] of Object.entries(v)) {
+              this.bindComponentsHook(value.__config__.children)
+            }
+          })
+        }
       })
     },
     // 设置表单状态

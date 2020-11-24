@@ -5,7 +5,7 @@ import componentMixin from '../mixins/componentMixin'
 import { parseTime } from '@/utils/index.js'
 
 export default {
-  name: 'uploadTable',
+  name: 'UploadTable',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {
@@ -34,19 +34,31 @@ export default {
         })
       }
     }
+    return h('el-col', {
+      attrs: {
+        span: config.span
+      }
+    }, [
+      h('el-row', { class: 'row' }, [
+        h('div', {
+          attrs: {
+            class: 'actions mb5'
+          }
+        }, [
+          h('el-upload', {
+            attrs: {
+              multiple: true,
+              class: 'upload-table',
+              // action: process.env.NODE_ENV === 'development' ? 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload' : window.origin + '/api/dfilecenter/file/upload'
+              action: 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload'
+            },
+            props: props
+          }, [
+            h('el-link', { attrs: { icon: 'el-icon-upload' }}, '上传')
 
-    return (
-      <el-col span={config.span}>
-        <el-row class='row'>
-          <div class='actions mb5'>
-            <el-upload
-              class='upload-table'
-              action={ process.env.NODE_ENV === 'development' ? 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload' : window.origin + '/api/dfilecenter/file/upload'}
-              props={props}
-              multiple>
-              <el-link icon='el-icon-upload'>上传</el-link>
-            </el-upload>
-            <el-link icon='el-icon-remove-outline' type='danger' onClick={() => {
+          ]),
+          h('el-link', { attrs: { icon: 'el-icon-remove-outline', type: 'danger' }, on: {
+            click: () => {
               this[`multipleSelection${config.renderKey}`].length > 0 && this.$confirm('是否删除？')
                 .then(() => {
                   this[`multipleSelection${config.renderKey}`].forEach(item => {
@@ -56,32 +68,101 @@ export default {
                     }
                   })
                 })
-            }}>删除</el-link>
-          </div>
-          <render key={config.renderKey} conf={scheme} on-selection-change={(val) => {
-            this[`multipleSelection${config.renderKey}`] = val
-          }}>
-            <el-table-column
-              type='selection'
-              align='center'
-              width='55'>
-            </el-table-column>,
-            <el-table-column type='index' align='center' width='50' label='序号'></el-table-column>,
-            {this.scheme.__config__.children.map((child, index) => {
-              const childConfig = child.__config__
-              return <el-table-column column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
-                default({ row }) {
-                  return (
-                    childConfig.field === 'fileDescription' ? <el-input value={row.fileDescription} placeholder='请输入内容' onInput={event => self.$set(row, childConfig.field, event)}/> : <span>{row[childConfig.field]}</span>
-                  )
-                } }}>
-              </el-table-column>
-            })}
-          </render>
-        </el-row>
+            }
+          }}, '删除')
+        ]),
 
-      </el-col>
-    )
+        h('render', {
+          props: {
+            key: config.renderKey,
+            conf: scheme
+          },
+          on: {
+            selectionChange: (val) => {
+              this[`multipleSelection${config.renderKey}`] = val
+            }
+          }
+        }, [
+          h('el-table-column', { attrs: { type: 'selection', align: 'center', width: '55px' }}),
+          h('el-table-column', { attrs: { type: 'index', align: 'center', width: '50px', label: '序号' }}),
+
+          // 列
+          [...this.scheme.__config__.children.map((child, index) => {
+            const { __config__: childConfig, ...attrs } = child
+            return childConfig.show ? h('el-table-column', {
+              props: {
+                ...attrs,
+                columnKey: `${index}`,
+                label: childConfig.label,
+                prop: childConfig.field
+              },
+              scopedSlots: {
+                default: ({ row, $index }) => {
+                  return childConfig.field === 'fileDescription' ? h('el-input', {
+                    attrs: { placeholder: '请输入内容' },
+                    props: {
+                      value: row[childConfig.field]
+                    },
+                    on: {
+                      input: event => self.$set(row, childConfig.field, event)
+                    }
+                  }) : <span>{row[childConfig.field]}</span>
+                },
+                header: ({ column }) => h('span', {}, column.label)
+              }
+            }, []) : null
+          })]
+        ])
+      ])
+    ])
+
+    // return (
+    //   <el-col span={config.span}>
+    //     <el-row class='row'>
+    //       <div class='actions mb5'>
+    //         <el-upload
+    //           class='upload-table'
+    //           action={ process.env.NODE_ENV === 'development' ? 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload' : window.origin + '/api/dfilecenter/file/upload'}
+    //           props={props}
+    //           multiple>
+    //           <el-link icon='el-icon-upload'>上传</el-link>
+    //         </el-upload>
+    //         <el-link icon='el-icon-remove-outline' type='danger' onClick={() => {
+    //           this[`multipleSelection${config.renderKey}`].length > 0 && this.$confirm('是否删除？')
+    //             .then(() => {
+    //               this[`multipleSelection${config.renderKey}`].forEach(item => {
+    //                 const delIndex = scheme.data.find(v => v.dataKey === item.dataKey)
+    //                 if (delIndex !== -1) {
+    //                   scheme.data.splice(delIndex, 1)
+    //                 }
+    //               })
+    //             })
+    //         }}>删除</el-link>
+    //       </div>
+    //       <render key={config.renderKey} conf={scheme} on-selection-change={(val) => {
+    //         this[`multipleSelection${config.renderKey}`] = val
+    //       }}>
+    //         <el-table-column
+    //           type='selection'
+    //           align='center'
+    //           width='55'>
+    //         </el-table-column>,
+    //         <el-table-column type='index' align='center' width='50' label='序号'></el-table-column>,
+    //         {this.scheme.__config__.children.map((child, index) => {
+    //           const childConfig = child.__config__
+    //           return <el-table-column column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
+    //             default({ row }) {
+    //               return (
+    //                 childConfig.field === 'fileDescription' ? <el-input value={row.fileDescription} placeholder='请输入内容' onInput={event => self.$set(row, childConfig.field, event)}/> : <span>{row[childConfig.field]}</span>
+    //               )
+    //             } }}>
+    //           </el-table-column>
+    //         })}
+    //       </render>
+    //     </el-row>
+
+    //   </el-col>
+    // )
   }
 }
 </script>

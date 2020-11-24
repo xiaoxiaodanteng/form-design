@@ -6,7 +6,7 @@ import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
-  name: 'colFormItem',
+  name: 'ColFormItem',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {
@@ -21,11 +21,10 @@ export default {
       return this.scheme.__config__
     },
     listeners() {
-      console.log(this.parser.buildListeners(this.scheme))
       return this.parser.buildListeners(this.scheme)
     },
     labelWidth() {
-      return this.config.labelWidth ? `${this.config.showLabel?this.config.labelWidth : 0}px` : null
+      return this.config.labelWidth ? `${this.config.showLabel ? this.config.labelWidth : 0}px` : null
     }
   },
   created() {
@@ -63,7 +62,8 @@ export default {
       attrs: {
         labelWidth,
         prop: this.scheme.__vModel__,
-        label: config.showLabel ? config.label : ''
+        label: config.showLabel ? config.label : '',
+        rules: this.scheme.rules || {}
       }
     }, [
       h('render', {
