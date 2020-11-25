@@ -36,10 +36,8 @@ const layouts = {
   rowFormItem: (h, scheme) => h('rowFormItem', { props: { scheme }}),
   cardItem: (h, scheme, index) => h('cardItem', { props: { scheme, index }}),
   paddingItem: (h, scheme, index) => h('paddingItem', { props: { scheme, index }}),
-
-  tipFormItem: (h, currentItem, index, list) => <tipFormItem scheme={currentItem}/>,
-  // 上传表格
-  uploadTable: (h, currentItem, index, list, parentList) => <uploadTable scheme={currentItem}/>,
+  tipFormItem: (h, scheme, index) => h('tipFormItem', { props: { scheme, index }}),
+  uploadTable: (h, scheme, index) => h('uploadTable', { props: { scheme, index }}),
 
   table_colFormItem(h, scheme, column, columnIndex, row, parent) {
     const config = scheme.__config__
