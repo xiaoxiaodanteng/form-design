@@ -275,6 +275,17 @@ export default {
           })
           cur.data = data
           this.$set(formData, cur.__vModel__, cur.data)
+        } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'layout') {
+          cur.data.forEach(item => {
+            // eslint-disable-next-line no-unused-vars
+            for (const [key, val] of Object.entries(item)) {
+              if (val.__config__.children.length > 0) {
+                val.__config__.children.forEach(v => {
+                  formData[v.__vModel__] = v.__config__.defaultValue
+                })
+              }
+            }
+          })
         } else {
           if (cur.__vModel__) formData[cur.__vModel__] = config.defaultValue
         }

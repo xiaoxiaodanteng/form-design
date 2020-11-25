@@ -39,7 +39,7 @@ export default {
     if (!config.show) return null
     return h('el-col', {
       attrs: { span: config.span }
-    }, [h('el-row', { class: 'row' }, [
+    }, [h('el-row', [
       h('render', {
         props: {
           conf: scheme

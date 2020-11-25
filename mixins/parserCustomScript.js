@@ -41,7 +41,9 @@ export default {
   methods: {
     initComponentFieldMaps(componentList, maps) {
       componentList.forEach(component => {
-        if (component.__vModel__ && !maps[component.__vModel__]) maps[component.__vModel__] = component
+        if (component.__vModel__ && !maps[component.__vModel__]) {
+          maps[component.__vModel__] = component
+        }
         if (component.__config__ && component.__config__.children) this.initComponentFieldMaps(component.__config__.children, maps)
 
         if (component.data && component.__config__.tableType === 'layout') {
@@ -66,7 +68,6 @@ export default {
       const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
-
       this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVal || {})
     },
     getHookStr(code) {

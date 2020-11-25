@@ -51,6 +51,7 @@ export default {
   watch: {
     // 监听自定义脚本是否变化
     selfMethodCodeIsChange(val) {
+      console.log(val)
       this.initComponentScript()
     },
     componentValue(val) {

@@ -38,16 +38,30 @@ export default {
     addTableRow() {
       const row = {}
       this.scheme.__config__.children.forEach(child => {
-        row[child.__config__.field] = {
-          __config__: {
-            formId: this.parser.getNewId(),
-            defaultValue: '',
-            type: 'text',
-            children: []
-          }
-        }
+        row[child.__config__.field] = child.__config__.defaultValue || ''
       })
       this.scheme.data.push(row)
+    },
+    delRow() {
+      const config = this.scheme.__config__
+      if (config.tableSelectType === 'multiple') {
+        this[`multipleSelection${config.renderKey}`].length > 0 && this.$confirm('是否删除？')
+          .then(() => {
+            this[`multipleSelection${config.renderKey}`].forEach(item => {
+              const delIndex = this.scheme.data.findIndex(v => v === item)
+              if (delIndex !== -1) {
+                this.scheme.data.splice(delIndex, 1)
+              }
+            })
+          })
+      } else {
+        if (this.currentRow) {
+          const delIndex = this.scheme.data.findIndex(v => v === this.currentRow)
+          if (delIndex !== -1) {
+            this.scheme.data.splice(delIndex, 1)
+          }
+        }
+      }
     }
   },
   render(h) {
@@ -57,7 +71,17 @@ export default {
     if (!config.show) return null
     return h('el-col', {
       attrs: { span: config.span }
-    }, [h('el-row', { class: 'row' }, [
+    }, [h('el-row', [
+      h('div', { class: 'actions mb5' }, [
+        config.showAction && h('el-link', { attrs: { icon: 'el-icon-circle-plus-outline', type: 'primary' }, on: { click: event => {
+          this.addTableRow()
+          event.stopPropagation()
+        } }}, '新增'),
+        config.showAction && h('el-link', { attrs: { icon: 'el-icon-circle-plus-outline', type: 'danger' }, on: { click: event => {
+          this.delRow()
+          event.stopPropagation()
+        } }}, '删除')
+      ]),
       h('render', {
         props: {
           conf: scheme

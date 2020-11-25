@@ -5,6 +5,8 @@ import colFormItem from '../components/colFormItem'
 import tipFormItem from '../components/tipFormItem'
 import uploadTable from '../components/uploadTable'
 import rowFormItem from '../components/rowFormItem'
+import cardItem from '../components/cardItem'
+import paddingItem from '../components/paddingItem'
 
 const componentList = {
   tableColgroup(h, currentItem) {
@@ -32,6 +34,8 @@ const layouts = {
     })
   },
   rowFormItem: (h, scheme) => h('rowFormItem', { props: { scheme }}),
+  cardItem: (h, scheme, index) => h('cardItem', { props: { scheme, index }}),
+  paddingItem: (h, scheme, index) => h('paddingItem', { props: { scheme, index }}),
 
   tipFormItem: (h, currentItem, index, list) => <tipFormItem scheme={currentItem}/>,
   // 上传表格
@@ -83,7 +87,9 @@ export default {
     colFormItem,
     tipFormItem,
     rowFormItem,
-    uploadTable
+    uploadTable,
+    cardItem,
+    paddingItem
   },
   methods: {
     renderFormItem(h, elementList, root) {
