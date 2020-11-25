@@ -29,6 +29,17 @@ export default {
 
   },
   computed: {
+    $props() {
+      return this.$attrs.globalVal
+    }
+  },
+  watch: {
+    $props: {
+      deep: true,
+      handler() {
+        this.runHook('props')
+      }
+    }
   },
   created() {
     this.initComponentFieldMaps(this.formConfCopy.fields, this.componentFieldMaps)
