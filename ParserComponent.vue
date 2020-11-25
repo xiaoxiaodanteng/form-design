@@ -84,7 +84,6 @@ export default {
       }
     }
     if (Object.keys(this.value).length > 0) {
-      console.log(this.value)
       // this.initFormDataByVmodel()
       this.setComponentConf(data.formConfCopy.fields)
     }
@@ -189,9 +188,11 @@ export default {
             }
           }
         } else {
-          component.__config__.defaultValue = formValue
-          if (component.__config__.tag === 'el-upload') {
-            component['file-list'] = formValue
+          if (formValue !== null && formValue !== undefined) {
+            component.__config__.defaultValue = formValue
+            if (component.__config__.tag === 'el-upload') {
+              component['file-list'] = formValue
+            }
           }
         }
         if (component.__config__.children) {
@@ -294,7 +295,9 @@ export default {
             }
           })
         } else {
-          if (cur.__vModel__) formData[cur.__vModel__] = config.defaultValue
+          if (cur.__vModel__) {
+            formData[cur.__vModel__] = config.defaultValue
+          }
         }
         if (config.children) this.initFormData(config.children, formData)
       })
