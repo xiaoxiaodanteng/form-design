@@ -84,7 +84,8 @@ export default {
       }
     }
     if (Object.keys(this.value).length > 0) {
-      this.initFormDataByVmodel()
+      console.log(this.value)
+      // this.initFormDataByVmodel()
       this.setComponentConf(data.formConfCopy.fields)
     }
     this.initFormData(data.formConfCopy.fields, data[FORM_MODEL])
@@ -128,6 +129,14 @@ export default {
         this.setForm()
       }
     },
+    value: {
+      deep: true,
+      handler(value, oldValue) {
+        // console.log(value === oldValue)
+        // this.initFormDataByVmodel()
+        // this.setComponentConf(this.formConfCopy.fields)
+      }
+    },
     [FORM_MODEL]: {
       deep: true,
       // immutable: true,
@@ -164,10 +173,26 @@ export default {
       componentList.forEach(component => {
         const formValue = this.value[component.__vModel__]
         // 表格类型数据
-        if (Array.isArray(formValue) && Object.keys(component).includes('data')) {
-          component.data = this.value[component.__vModel__]
+        if (component.data && component.__config__.tableType === 'layout') {
+          component.data.forEach(item => {
+            component.__config__.children.forEach(column => {
+              if (item[column.__config__.field].__config__.children.length > 0) {
+                this.setComponentConf(item[column.__config__.field].__config__.children)
+              }
+            })
+          })
+        } else if (component.data && component.__config__.tag === 'el-table') {
+          if (this.value[component.__vModel__]) {
+            component.data = this.value[component.__vModel__]
+            if (component.__config__.tableType === 'dynamic') {
+              component.__config__.autoFetch = false
+            }
+          }
         } else {
           component.__config__.defaultValue = formValue
+          if (component.__config__.tag === 'el-upload') {
+            component['file-list'] = formValue
+          }
         }
         if (component.__config__.children) {
           this.setComponentConf(component.__config__.children)
@@ -255,25 +280,7 @@ export default {
       componentList.forEach(cur => {
         const config = cur.__config__
 
-        if (cur.data && cur.__config__.tableType === 'dynamic') {
-          this.$set(formData, cur.__vModel__, cur.data)
-        } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'static') {
-          cur.__config__.children.forEach(column => {
-            column.__config__.children = cur.data[0][column.__config__.field].__config__.children
-          })
-          const data = []
-          cur.data.forEach(item => {
-            const tempObj = {}
-            for (const [key, val] of Object.entries(item)) {
-              if (val.__config__.children.length > 0) {
-                tempObj[key] = val.__config__.children[0].__config__.defaultValue
-              } else {
-                tempObj[key] = val.__config__.defaultValue
-              }
-            }
-            data.push(tempObj)
-          })
-          cur.data = data
+        if (cur.data && cur.__config__.tableType !== 'layout') {
           this.$set(formData, cur.__vModel__, cur.data)
         } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'layout') {
           cur.data.forEach(item => {
@@ -357,13 +364,13 @@ export default {
     // 普通提交
     submitForm() {
       // console.log(this.parserFormData.field105 === this.formConfCopy.fields[1].data)
-
+      console.log(this[FORM_MODEL])
       this.$refs[this.formConf.formRef].validate(valid => {
         if (!valid) return
-        const formData = this.getFormData()
+        // const formData = this.getFormData()
         // console.log(this.formConf, formData, this[FORM_MODEL])
         // 触发sumit事件
-        this.$emit('submit', formData)
+        this.$emit('submit', this[FORM_MODEL])
         return true
       })
     },

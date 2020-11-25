@@ -79,9 +79,9 @@ export default {
       const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
-      console.log(`----执行${type}钩子---`)
-      console.log(fnStr)
-      console.log(`----执行${type}钩子结束---`)
+      // console.log(`----执行${type}钩子---`)
+      // console.log(fnStr)
+      // console.log(`----执行${type}钩子结束---`)
       this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVar || this.$attrs['global-var'] || {})
     },
     getHookStr(code) {
