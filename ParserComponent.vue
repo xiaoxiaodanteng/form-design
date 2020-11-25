@@ -137,7 +137,6 @@ export default {
         this.disposeCustomDisabledComponent()
         this.$emit('input', this.getFormData())
         this.runHook('watch')
-        console.log(formData, this.formConfCopy)
       }
     }
   },
