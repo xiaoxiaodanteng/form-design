@@ -37,13 +37,9 @@ export default {
   render(h) {
     const scheme = this.scheme
     const config = this.scheme.__config__
-    return (
-      config.show ? <el-col span={config.span}>
-        <render key={config.renderKey} conf={scheme}>
-          {config.defaultValue}
-        </render>
-      </el-col> : null
-    )
+    return config.show ? h('el-col', { attrs: { span: config.span }}, [
+      h('render', { props: { key: config.renderKey, conf: scheme }}, config.defaultValue)
+    ]) : null
   }
 }
 </script>
