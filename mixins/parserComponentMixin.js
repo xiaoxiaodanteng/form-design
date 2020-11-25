@@ -26,13 +26,7 @@ const layouts = {
   elementStaticTable: (h, currentItem, index) => h('elementStaticTable', { props: { scheme: currentItem, index }}),
   elementLayoutTable: (h, currentItem, index) => h('elementLayoutTable', { props: { scheme: currentItem, index }}),
 
-  colFormItem(h, scheme) {
-    return h('colFormItem', {
-      props: {
-        scheme
-      }
-    })
-  },
+  colFormItem: (h, scheme) => h('colFormItem', { props: { scheme }}),
   rowFormItem: (h, scheme) => h('rowFormItem', { props: { scheme }}),
   cardItem: (h, scheme, index) => h('cardItem', { props: { scheme, index }}),
   paddingItem: (h, scheme, index) => h('paddingItem', { props: { scheme, index }}),

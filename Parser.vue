@@ -43,7 +43,7 @@ export default {
     attrs() {
       return {
         ...this.$attrs,
-        globalVal: this.$attrs.globalVal || {}
+        globalVar: this.$attrs.globalVar || {}
       }
     }
   },

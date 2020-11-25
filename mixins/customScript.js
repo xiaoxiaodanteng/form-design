@@ -188,7 +188,7 @@ export default {
       if (!code) return
       const fnStr = this.getHookStr(code)
       console.log(fnStr)
-      this.hookHandler(fnStr, this.scheme, this.formData, this.parser.$attrs.globalVal || {})
+      this.hookHandler(fnStr, this.scheme, this.formData, this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {})
     },
     hookHandler(code, $this, $form, $props) {
       try {
