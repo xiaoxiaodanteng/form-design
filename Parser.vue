@@ -48,7 +48,6 @@ export default {
     }
   },
   created() {
-
   },
   methods: {
     onSubmit(data) {

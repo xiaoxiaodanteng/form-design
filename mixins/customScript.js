@@ -51,7 +51,6 @@ export default {
   watch: {
     // 监听自定义脚本是否变化
     selfMethodCodeIsChange(val) {
-      console.log(val)
       this.initComponentScript()
     },
     componentValue(val) {
@@ -105,7 +104,6 @@ export default {
     },
     getHookStr(code) {
       const ast = parse(code)
-      console.log(ast)
       // 转换变量信息
       traverse(ast, {
         enter(path) {
@@ -189,6 +187,7 @@ export default {
       const code = this.iGetInnerText(this.scheme[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
+      console.log(fnStr)
       this.hookHandler(fnStr, this.scheme, this.formData, this.parser.$attrs.globalVal || {})
     },
     hookHandler(code, $this, $form, $props) {

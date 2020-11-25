@@ -52,6 +52,10 @@ export default {
     if (!config.show) return null
     const listeners = this.parser.buildListeners(this.scheme)
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
+    if (this.formData && Object.keys(this.formData).includes(this.scheme.__vModel__)) {
+      // console.log(this.formData[this.scheme.__vModel__])
+      this.scheme.__config__.defaultValue = this.formData[this.scheme.__vModel__]
+    }
     if (config.showLabel === false) labelWidth = '0'
 
     return h('el-col', {

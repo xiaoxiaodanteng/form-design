@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     $props() {
-      return this.$attrs.globalVal
+      return this.$attrs.globalVal || this.$attrs['global-val']
     }
   },
   watch: {
@@ -82,7 +82,7 @@ export default {
       console.log(`----执行${type}钩子---`)
       console.log(fnStr)
       console.log(`----执行${type}钩子结束---`)
-      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVal || {})
+      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVal || this.$attrs['global-val'] || {})
     },
     getHookStr(code) {
       const ast = parse(code)

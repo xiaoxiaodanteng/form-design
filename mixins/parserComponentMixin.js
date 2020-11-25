@@ -161,7 +161,9 @@ export default {
 
     setValue(event, config, scheme) {
       this.$set(config, 'defaultValue', event)
-      if (this.parserFormData) this.$set(this.parserFormData, scheme.__vModel__, event)
+      if (this.parserFormData) {
+        this.$set(this.parserFormData, scheme.__vModel__, event)
+      }
     },
 
     buildListeners(scheme) {
