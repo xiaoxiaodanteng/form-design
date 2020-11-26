@@ -110,9 +110,9 @@ export default {
     },
     [FORM_MODEL]: {
       deep: true,
-      // immutable: true,
-      handler(formData) {
-        this.updateModel(formData)
+      immediate: true,
+      handler() {
+        this.updateModel(this[FORM_MODEL])
       }
     }
   },
