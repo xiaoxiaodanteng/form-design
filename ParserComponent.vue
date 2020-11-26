@@ -9,6 +9,7 @@ import componentBuildHooks from '@/utils/formGenerator/hooks'
 
 import parserComponentMixin from './mixins/parserComponentMixin'
 import parserCustomScript from './mixins/parserCustomScript'
+import { debounce } from 'throttle-debounce'
 const ruleTrigger = {
   'el-input': 'blur',
   'el-input-number': 'blur',
@@ -56,6 +57,8 @@ export default {
       [FORM_MODEL]: {},
       [FORM_RULES]: {},
 
+      updateModel: debounce(200, this.handleUpdateModel),
+
       // 自定义禁用列表
       customDisabledComponentList: []
     }
@@ -92,29 +95,6 @@ export default {
     return data
   },
   watch: {
-    formConf: {
-      deep: true,
-      immutable: true,
-      handler(data) {
-        // self.formConfCopy = deepClone(data || {})
-        // if (Object.keys(self.formConfCopy).length === 0) {
-        //   self.formConfCopy = {
-        //     disabled: false,
-        //     fields: [],
-        //     formBtns: true,
-        //     gutter: 15,
-        //     labelPosition: 'right',
-        //     labelWidth: 100,
-        //     size: 'mini',
-        //     span: 24
-        //   }
-        // }
-        // self.buildRules(self.formConfCopy.fields, self[FORM_RULES])
-        // self.initFormData(self.formConfCopy.fields, self[FORM_MODEL])
-        // self.setForm()
-        // console.log(this.formConfCopy)
-      }
-    },
     formConfCopy: {
       deep: true,
       handler(data) {
@@ -128,23 +108,11 @@ export default {
         this.setForm()
       }
     },
-    value: {
-      deep: true,
-      handler(value, oldValue) {
-        // console.log(value === oldValue)
-        // this.initFormDataByVmodel()
-        // this.setComponentConf(this.formConfCopy.fields)
-      }
-    },
     [FORM_MODEL]: {
       deep: true,
       // immutable: true,
       handler(formData) {
-        this.parserFormData = formData
-        // 处理自定义禁用事件
-        this.disposeCustomDisabledComponent()
-        this.$emit('input', this.getFormData())
-        this.runHook('watch')
+        this.updateModel(formData)
       }
     }
   },
@@ -168,6 +136,31 @@ export default {
   mounted() {
   },
   methods: {
+    handleUpdateModel(formData) {
+      this.parserFormData = formData
+      // 处理自定义禁用事件
+      this.disposeCustomDisabledComponent()
+
+      const proxyFormData = new Proxy(formData, {
+        get: (target, propKey, receiver) => {
+          if (propKey === '__validated__') {
+            let isValidated
+            this.$refs[this.formConf.formRef].validate(valid => {
+              isValidated = valid
+            })
+            return isValidated
+          } else if (propKey === 'value') {
+            return formData
+          }
+          return Reflect.get(target, propKey, receiver)
+        },
+        set: (target, propKey, value, receiver) => {
+          return Reflect.set(target, propKey, value, receiver)
+        }
+      })
+      this.$emit('input', proxyFormData)
+      this.runHook('watch')
+    },
     setComponentConf(componentList) {
       componentList.forEach(component => {
         const formValue = this.value[component.__vModel__]
@@ -182,10 +175,22 @@ export default {
           })
         } else if (component.data && component.__config__.tag === 'el-table') {
           if (this.value[component.__vModel__]) {
-            component.data = this.value[component.__vModel__]
-            if (component.__config__.tableType === 'dynamic') {
+            if (component.__config__.tableType === 'static' && component.data.length === this.value[component.__vModel__].length) {
+              const value = this.value[component.__vModel__]
+              component.data.forEach((item, index) => {
+                for (const [key, val] of Object.entries(item)) {
+                  if (val.__config__.children.length > 0) {
+                    val.__config__.children[0].__config__.defaultValue = value[key]
+                  } else {
+                    val.__config__.defaultValue = value[key]
+                  }
+                }
+              })
+            } else {
               component.__config__.autoFetch = false
             }
+            // console.log(component, component.__vModel__)
+            component.data = this.value[component.__vModel__]
           }
         } else {
           if (formValue !== null && formValue !== undefined) {
@@ -281,7 +286,7 @@ export default {
       componentList.forEach(cur => {
         const config = cur.__config__
 
-        if (cur.data && cur.__config__.tableType !== 'layout') {
+        if (cur.data && cur.__config__.tableType === 'dynamic') {
           this.$set(formData, cur.__vModel__, cur.data)
         } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'layout') {
           cur.data.forEach(item => {
@@ -294,6 +299,25 @@ export default {
               }
             }
           })
+        } else if (cur.__config__ && cur.__config__.tableType === 'static') {
+          const newData = []
+          cur.data.forEach((data, index) => {
+            const temp = {}
+            cur.__config__.children.forEach(column => {
+              if (index === 0) {
+                column.__config__.children = data[column.__config__.field].__config__.children
+                column.__config__.defaultValue = data[column.__config__.field].__config__.defaultValue
+              }
+              if (data[column.__config__.field].__config__.children.length > 0) {
+                temp[column.__config__.field] = data[column.__config__.field].__config__.children[0].__config__.defaultValue
+              } else {
+                temp[column.__config__.field] = data[column.__config__.field].__config__.defaultValue
+              }
+            })
+            newData.push(temp)
+          })
+          cur.data = newData
+          this.$set(formData, cur.__vModel__, cur.data)
         } else {
           if (cur.__vModel__) {
             formData[cur.__vModel__] = config.defaultValue
