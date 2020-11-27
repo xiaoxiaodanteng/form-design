@@ -37,14 +37,17 @@ const layouts = {
     const config = scheme.__config__
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     if (config.showLabel === false) labelWidth = '0'
-    const props = {}
-    if (this.parserFormData[parent.__vModel__] && this.parserFormData[parent.__vModel__].length > 0) {
+    if (column.__config__.showContent !== undefined && !column.__config__.showContent) return null
+    if (column.__config__.disabled !== undefined && column.__config__.disabled) {
+      scheme.disabled = column.__config__.disabled
+    }
+    const props = {
+      label: config.showLabel ? config.label : '',
+      labelWidth
+    }
+    if (this.parserFormData[parent.__vModel__] && this.parserFormData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.children[0].__config__.required) {
       props.prop = `${parent.__vModel__}.${columnIndex}.${column.__config__.field}`
       props.rules = column.rules || {}
-      props.label = config.showLabel ? config.label : ''
-      props.labelWidth = labelWidth
-    } else {
-      return null
     }
     return (
       <el-col span={config.span}>
