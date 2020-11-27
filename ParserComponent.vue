@@ -86,6 +86,12 @@ export default {
         span: 24
       }
     }
+    if (Object.keys(this.value).length > 0) {
+      // this.initFormDataByVmodel()
+      this.setComponentConf(data.formConfCopy.fields)
+    }
+    this.initFormData(data.formConfCopy.fields, data[FORM_MODEL])
+    this.buildRules(data.formConfCopy.fields, data[FORM_RULES])
 
     return data
   },
@@ -114,12 +120,6 @@ export default {
   created() {
     if (Object.keys(this.formConfCopy).length > 0) {
       // 全局钩子
-      if (Object.keys(this.value).length > 0) {
-      // this.initFormDataByVmodel()
-        this.setComponentConf(this.formConfCopy.fields)
-      }
-      this.initFormData(this.formConfCopy.fields, this[FORM_MODEL])
-      this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
 
       buildHooks(this)
 
