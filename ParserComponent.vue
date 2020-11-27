@@ -180,17 +180,16 @@ export default {
               component.data.forEach((item, index) => {
                 for (const [key, val] of Object.entries(item)) {
                   if (val.__config__.children.length > 0) {
-                    val.__config__.children[0].__config__.defaultValue = value[key]
+                    val.__config__.children[0].__config__.defaultValue = value[index][key]
                   } else {
-                    val.__config__.defaultValue = value[key]
+                    val.__config__.defaultValue = value[index][key]
                   }
                 }
               })
             } else {
               component.__config__.autoFetch = false
+              component.data = this.value[component.__vModel__]
             }
-            // console.log(component, component.__vModel__)
-            component.data = this.value[component.__vModel__]
           }
         } else {
           if (formValue !== null && formValue !== undefined) {
@@ -415,8 +414,8 @@ export default {
     },
 
     fetchData(component) {
-      const { dataType, url, defaultParams, graphqlMethod, dependencies, dataFields } = component.__config__
-      if (dataType === 'dynamic' && url && graphqlMethod) {
+      const { dataPath, dataType, url, defaultParams, graphqlMethod, dependencies, dataFields } = component.__config__
+      if (dataType === 'dynamic' && url && graphqlMethod && dataPath) {
         const params = {}
         const paramsStrArr = []
         let dataFieldStr = ''
@@ -438,7 +437,8 @@ export default {
         }
         // 返回字段
         if (dataFields) {
-          dataFieldStr = dataFields.map(item => item.field).join(',')
+          // dataFieldStr = dataFields.map(item => item.field).join(',')
+          dataFieldStr = this.getParamsStr(dataFields)
         }
 
         const paramsStr = paramsStrArr.length > 0 ? `(${paramsStrArr.join(',')})` : ''
@@ -464,11 +464,23 @@ export default {
         })
       }
     },
+    getParamsStr(list) {
+      const strArr = []
+      list.forEach(item => {
+        let str = item.value
+        if (item.children && item.children.length > 0) {
+          str += `{${this.getParamsStr(item.children)}}`
+        }
+        // str = item.value
+        strArr.push(str)
+      })
+      return strArr.join(',')
+    },
     setRespData(component, respData) {
-      const { url, graphqlMethod, renderKey, dataConsumer } = component.__config__
+      const { dataPath, url, renderKey, dataConsumer } = component.__config__
       if (!url || !dataConsumer) return
       // console.log(respData)
-      const data = graphqlMethod.split('.').reduce((pre, item) => pre[item], respData)
+      const data = dataPath.split('.').reduce((pre, item) => pre[item], respData)
       this.setObjectValueByStringKeys(component, dataConsumer, data)
       const i = this.formConfCopy.fields.findIndex(item => item.__config__.renderKey === renderKey)
       if (i > -1) this.$set(this.formConfCopy.fields, i, component)

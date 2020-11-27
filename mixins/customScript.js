@@ -100,7 +100,6 @@ export default {
           }
         }
       }
-      // console.log(this.scheme)
     },
     getHookStr(code) {
       const ast = parse(code)

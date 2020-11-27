@@ -69,6 +69,19 @@ export default {
     const config = this.scheme.__config__
     const self = this
     if (!config.show) return null
+    const indexFnCodeStr = this.scheme['fn_index-method']
+    const indexAttr = {}
+    if (indexFnCodeStr) {
+      let fn
+      try {
+        // eslint-disable-next-line no-eval
+        eval(`fn = ${indexFnCodeStr}`)
+        indexAttr.index = fn
+      } catch (e) {
+        console.error(e)
+        this.$message.error('序号自定义函数配置错误')
+      }
+    }
     return h('el-col', {
       attrs: { span: config.span }
     }, [
@@ -102,7 +115,8 @@ export default {
               type: 'index',
               align: 'center',
               width: '50px',
-              label: '序号'
+              label: '序号',
+              ...indexAttr
             }
           }) : null,
 
