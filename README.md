@@ -12,7 +12,9 @@ Vue.use(Parser)
 # 示例
 
 <script>
-import { emit } from 'form-fe-parser'
+import { emit, setAuthToken } from 'form-fe-parser'
+
+// 在能拿到用户token时调用 setAuthToken(token)
 
 export default {
   data() {
