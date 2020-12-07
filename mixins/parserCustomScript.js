@@ -62,7 +62,7 @@ export default {
       // console.log(`----执行${type}钩子---`)
       // console.log(fnStr)
       // console.log(`----执行${type}钩子结束---`)
-      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.componentModel, this.$attrs.globalVar || this.$attrs['global-var'] || {})
+      this.hookHandler(fnStr, this.formConfCopy, this.value, this.componentModel, this.$attrs.globalVar || this.$attrs['global-var'] || {})
     },
     getHookStr(code) {
       const ast = parse(code)
@@ -163,7 +163,7 @@ export default {
         set: (target, propKey, value, receiver) => {
           if (propKey === 'value') {
             if (target.data) {
-              this.parserFormData[component.__vModel__] = value
+              this.value[component.__vModel__] = value
               component.data = value
             } else {
               component.__config__.defaultValue = value

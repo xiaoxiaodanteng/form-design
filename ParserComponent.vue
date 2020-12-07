@@ -102,11 +102,13 @@ export default {
       handler(newVal, oldVal) {
         if (Object.keys(this.value).length > 0) {
           if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
-            this.handleUpdateModel()
-            this.setModelToProxy(this.componentModel)
-            this.parserFormData = newVal
+            for (const [key, value] of Object.entries(this.value)) {
+              if (this.parserFormData.hasOwnProperty(key)) {
+                this.parserFormData[key] = value
+              }
+            }
+            this.$emit('input', this.parserFormData)
           }
-          // this.setFormDataByValue()
         }
         this.runHook('watch')
       }
@@ -216,7 +218,6 @@ export default {
               }
             }
           }
-
           return Reflect.set(target, propKey, value, receiver)
         }
       })

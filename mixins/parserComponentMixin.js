@@ -122,7 +122,8 @@ export default {
       })
     },
     renderFrom(h) {
-      const { formConfCopy } = this
+      const { formConfCopy, parserFormData } = this
+      console.log(parserFormData)
       return (
         <el-row gutter={formConfCopy.gutter}>
           <el-form
@@ -132,7 +133,7 @@ export default {
             label-width={`${formConfCopy.labelWidth}px`}
             ref={formConfCopy.formRef}
             // model不能直接赋值 https://github.com/vuejs/jsx/issues/49#issuecomment-472013664
-            props={{ model: this.parserFormData }}
+            props={{ model: parserFormData }}
             rules={this.parserFormRules}
           >
             {this.renderFormItem(h, formConfCopy.fields)}
@@ -166,6 +167,7 @@ export default {
       }
       this.$set(config, 'defaultValue', value)
       if (this.parserFormData && this.isAddToForm(scheme.__config__)) {
+        // console.log(value)
         this.$set(this.parserFormData, scheme.__vModel__, value)
       }
     },
