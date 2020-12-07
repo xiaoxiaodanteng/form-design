@@ -8,7 +8,7 @@ const headers = {
 
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: `${process.env.VUE_APP_HOSTNAME}${process.env.VUE_APP_BASE_API}`, // url = base url + request url
   // baseURL: `${window.origin}${process.env.VUE_APP_BASE_API}/api/data-workflow-process-erp`,
   // baseURL: `http://bi.dev.nearbyexpress.com/api/data-workflow-process-erp`,
   timeout: 100000 // request timeout

@@ -8,7 +8,9 @@ npm i form-fe-parser
 
 # 使用
 import Parser from 'form-fe-parser'
-Vue.use(Parser)
+Vue.use(Parser, {
+  hostname: '' // graphql api url
+})
 # 示例
 
 <script>
