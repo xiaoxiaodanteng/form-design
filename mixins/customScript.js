@@ -1,8 +1,8 @@
 import { parse, parseExpression } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generator from '@babel/generator'
-import { debounce } from 'throttle-debounce'
 import * as t from '@babel/types'
+import graphqlRequest from '../graphqlRequest'
 
 // 钩子函数
 // const hookMap = {
@@ -27,7 +27,9 @@ const componentConfigAttrs = [
 export default {
   data() {
     return {
-      componentFieldMaps: {}
+      componentFieldMaps: {},
+
+      schemeProxy: null
     }
   },
   beforeCreate() {
@@ -43,42 +45,55 @@ export default {
       return codeStr
     },
 
+    createdCode() {
+      return this.scheme.__created__
+    },
+    mountedCode() {
+      return this.scheme.__mounted__
+    },
+
     componentValue() {
+      // 数组数据
+      if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
+        return this.scheme.data
+      }
+      // 其他
       if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
       return this.scheme.__config__.defaultValue
     }
   },
   watch: {
     // 监听自定义脚本是否变化
-    selfMethodCodeIsChange(val) {
-      this.initComponentScript()
+    selfMethodCodeIsChange: {
+      immediate: true,
+      handler() {
+        this.initComponentScript()
+      }
     },
-    componentValue(val) {
-      debounce(340, this.runHook('watch'))
+    createdCode() {
+      this.runHook('created')
+    },
+    mountedCode() {
+      this.runHook('mounted')
+    },
+    // 值变化
+    componentValue: {
+      deep: true,
+      immediate: true,
+      handler() {
+        this.runHook('watch')
+      }
     }
   },
   created() {
-    this.initComponentFieldMaps(this.parser.formConfCopy && this.parser.formConfCopy.fields || this.parser.drawingList, this.componentFieldMaps)
     // 初始化自定义脚本事件
     this.initComponentScript()
     this.runHook('created')
   },
+  mounted() {
+    this.runHook('mounted')
+  },
   methods: {
-    initComponentFieldMaps(componentList, maps) {
-      componentList.forEach(component => {
-        if (component.__vModel__ && !maps[component.__vModel__]) maps[component.__vModel__] = component
-        if (component.__config__ && component.__config__.children) this.initComponentFieldMaps(component.__config__.children, maps)
-
-        if (component.data && component.__config__.tableType === 'layout') {
-          component.data.forEach(v => {
-            // eslint-disable-next-line no-unused-vars
-            for (const [key, value] of Object.entries(v)) {
-              this.initComponentFieldMaps(value.__config__.children, maps)
-            }
-          })
-        }
-      })
-    },
     iGetInnerText(testStr) {
       if (testStr === undefined) return ''
       var resultStr = testStr.replace(/\ +/g, '') // 去掉空格
@@ -87,16 +102,15 @@ export default {
       return resultStr
     },
     initComponentScript() {
-      // console.log(parse(`function(params) {
-      //   console.log(params);
-      // }`))
       for (const [key, value] of Object.entries(this.scheme)) {
         if (key.indexOf('fn_') !== -1) {
           if (this.iGetInnerText(value)) {
             let fn
             // eslint-disable-next-line no-eval
             eval(`fn = ${value}`)
-            this.scheme[key.replace('fn_', '')] = fn
+            this.$nextTick(() => {
+              this.$set(this.scheme, key.replace('fn_', ''), fn)
+            })
           }
         }
       }
@@ -181,15 +195,67 @@ export default {
 
       return generator(ast).code
     },
+    currentProxy() {
+      if (!this.schemeProxy) {
+        this.schemeProxy = new Proxy(this.scheme, {
+          get: (target, propKey, receiver) => {
+            // 拦截请求
+            if (propKey === 'fetchData') {
+              return (customParamsObj) => this.parser.fetchData(this.scheme, customParamsObj)
+            }
+            if (propKey === 'on') {
+              return (event, fn) => this.on(event, fn)
+            }
+            return Reflect.get(target, propKey, receiver)
+          },
+          set: (target, propKey, value, receiver) => {
+            if (propKey === 'value') {
+              if (target.data) {
+                this.parserFormData[this.scheme.__vModel__] = value
+              }
+            }
+            return Reflect.set(target, propKey, value, receiver)
+          }
+        })
+      }
+      return this.schemeProxy
+    },
+    fetch(url, params) {
+      return graphqlRequest({
+        url: `${this.$hostname}${url}`,
+        method: 'POST',
+        data: params
+      })
+    },
+    // 绑定事件
+    on(event, fn) {
+      if (this.scheme.on) {
+        this.$set(this.scheme.on, event, fn)
+      } else {
+        this.$set(this.scheme, 'on', {
+          [event]: fn
+        })
+        console.log(this.scheme)
+      }
+    },
     // 执行钩子
     runHook(type) {
       const code = this.iGetInnerText(this.scheme[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
       console.log(fnStr)
-      this.hookHandler(fnStr, this.scheme, this.formData, this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {})
+      this.hookHandler(fnStr, this.currentProxy(), this.formData, this.parser.componentModel, this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {})
     },
-    hookHandler(code, $this, $form, $props) {
+    /**
+     *
+     * @param {String} code 执行的代码
+     * @param {Object} $this 当前表单组件
+     * @param {Object} $form form
+     * @param {Object} $components components
+     * @param {Object} $props props
+     * @param {Function} h 渲染函数
+     */
+    hookHandler(code, $this, $form, $components, $props, h = this.$createElement) {
       try {
         // eslint-disable-next-line no-eval
         eval(`
@@ -202,21 +268,7 @@ export default {
     },
     // 获取组件数据
     getComponentByField(field) {
-      return this.handleGetComponent(this.parser.formConfCopy.fields, field)
-    },
-    handleGetComponent(componentList, field) {
-      let component = null
-      for (let i = 0; i < componentList.length; i++) {
-        const com = componentList[i]
-        if (com.__vModel__ === field) {
-          component = com
-        } else {
-          if (com.__config__.children) {
-            component = this.handleGetComponent(com.__config__.children, field)
-          }
-        }
-      }
-      return component
+      return this.parser.getComponentByField(field)
     }
   }
 }

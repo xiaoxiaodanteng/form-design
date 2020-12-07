@@ -1,10 +1,10 @@
 <script>
 import { deepClone } from '@/utils/formGenerator/index'
 import render from '@/components/FormGenerator/render/render.js'
-// import { buildHooks } from './parseHooks'
+import { buildHooks } from './parseHooks'
 import graphqlRequest from './graphqlRequest'
 import __method__ from '@/components/FormGenerator/mixins/__method__'
-// import componentBuildHooks from '@/utils/formGenerator/hooks'
+import componentBuildHooks from '@/utils/formGenerator/hooks'
 // import { isNumberStr, isBooleanStr } from '@/utils/formGenerator/index'
 
 import parserComponentMixin from './mixins/parserComponentMixin'
@@ -47,23 +47,21 @@ export default {
   },
   provide() {
     return {
-      formData: this.value,
+      formData: this[FORM_MODEL],
       parser: this
     }
   },
   data() {
     const data = {
       formConfCopy: deepClone(this.formConf),
-      // [FORM_MODEL]: {},
+      [FORM_MODEL]: {},
       [FORM_RULES]: {},
 
       updateModel: debounce(200, this.handleUpdateModel),
 
-      componentModel: {}, // 存放不添加到formData的组件数据
-
       componentMaps: {} // 组件key:component
     }
-    data.parserFormData = this.value
+    data.parserFormData = data[FORM_MODEL]
     data.parserFormRules = data[FORM_MODEL]
     if (this.formConf && this.formConf.fields) {
       this.formConf.fields.forEach(field => {
@@ -99,98 +97,60 @@ export default {
     },
     value: {
       deep: true,
+      immediate: true,
       handler(newVal, oldVal) {
-        if (Object.keys(this.value).length > 0) {
-          if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
-            this.handleUpdateModel()
-            this.setModelToProxy(this.componentModel)
-            this.parserFormData = newVal
-          }
-          // this.setFormDataByValue()
+        if (Object.keys(this.value).length > 0 && !newVal.value) {
+          this.setFormDataByValue()
+          console.log(this[FORM_MODEL])
         }
-        this.runHook('watch')
+      }
+    },
+    [FORM_MODEL]: {
+      deep: true,
+      immediate: true,
+      handler(newVal, oldVal) {
+        this.updateModel(this[FORM_MODEL])
       }
     }
   },
   created() {
+    // console.log(1)
     this.init()
-    // 初始化自定义脚本事件
-    this.runHook('created')
+
+    buildHooks(this)
   },
   mounted() {
   },
   methods: {
     // 初始化
     init() {
-      this.handleUpdateModel(this.value)
-      // 设置代理
-      this.setModelToProxy(this.componentModel)
-      // console.log(this.value)
+      this.initFormData(this.formConfCopy.fields, this[FORM_MODEL])
+      this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
 
-      this.initFormData(this.formConfCopy.fields, this.value)
-      // this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
-
+      // 如果有vModel绑定
+      if (Object.keys(this.value).length > 0) {
+        this.setFormDataByValue()
+      }
+      // console.log(this[FORM_MODEL], this.formConfCopy.fields)
+      if (Object.keys(this.formConfCopy).length > 0) {
       // 全局钩子
-      // buildHooks(this)
 
-      // 事件
-      // this.hasEventComponentList = this.getHasEventComponentList(this.formConfCopy.fields)
-      // 添加钩子
-      // this.bindComponentsHook(this.formConfCopy.fields)
-      // 绑定钩子事件
-      // this.addHookListener(this.formConfCopy.fields)
-      // 设置表单
-      this.setForm()
-      // 请求异步数据
-      this.getDynamicData(this.formConfCopy.fields)
-    },
-    // 根据vModel设置form
-    setFormDataByValue() {
-      for (const [key, val] of Object.entries(this.value)) {
-        if (this.value.hasOwnProperty(key)) {
-          this.value[key] = val
-          // 判断是否是数组类型并且是表格的数据依赖
-          if (Array.isArray(val)) {
-            // console.log(key, val)
-            const component = this.componentMaps[key]
-            if (component && component.__config__.tag === 'el-table') {
-              component.data = val
-            }
-          }
-        }
+        // 事件
+        this.hasEventComponentList = this.getHasEventComponentList(this.formConfCopy.fields)
+        // 添加钩子
+        this.bindComponentsHook(this.formConfCopy.fields)
+        // 绑定钩子事件
+        this.addHookListener(this.formConfCopy.fields)
+        // 设置表单
+        this.setForm()
+        // 请求异步数据
+        this.getDynamicData(this.formConfCopy.fields)
       }
     },
-    setModelToProxy(data) {
-      const proxyFormData = new Proxy(data, {
-        get: (target, propKey, receiver) => {
-          if (propKey === 'value') {
-            return data
-          }
-          return Reflect.get(target, propKey, receiver)
-        },
-        set: (target, propKey, value, receiver) => {
-          // 判断是否是数组类型并且是表格的数据依赖
-          const component = this.componentMaps[propKey]
-          if (component) {
-            if (Array.isArray(value)) {
-            // console.log(key, val)
-              if (component && component.__config__.tag === 'el-table') {
-                component.data = value
-              } else {
-                component.__config__.defaultValue = value
-              }
-            } else {
-              component.__config__.defaultValue = value
-            }
-          }
-          return Reflect.set(target, propKey, value, receiver)
-        }
-      })
-      this.componentModel = proxyFormData
-    },
-    // 设置代理
-    handleUpdateModel() {
-      const proxyFormData = new Proxy(this.value, {
+    handleUpdateModel(formData) {
+      this.parserFormData = formData
+
+      const proxyFormData = new Proxy(formData, {
         get: (target, propKey, receiver) => {
           if (propKey === '__validated__') {
             let isValidated
@@ -199,30 +159,16 @@ export default {
             })
             return isValidated
           } else if (propKey === 'value') {
-            return this.value
+            return formData
           }
           return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
-          // 判断是否是数组类型并且是表格的数据依赖
-          const component = this.componentMaps[propKey]
-          if (component) {
-            if (Array.isArray(value)) {
-            // console.log(key, val)
-              if (component && component.__config__.tag === 'el-table') {
-                component.data = value
-              } else {
-                component.__config__.defaultValue = value
-              }
-            }
-          }
-
           return Reflect.set(target, propKey, value, receiver)
         }
       })
-      this.parserFormData = proxyFormData
       this.$emit('input', proxyFormData)
-      // console.log(this.value, proxyFormData)
+      this.runHook('watch')
     },
     setComponentConf(componentList) {
       componentList.forEach(component => {
@@ -267,34 +213,20 @@ export default {
         }
       })
     },
-    // 初始化执行
-    initFormData(componentList) {
+    // 初始化执行 只执行一次
+    initFormData(componentList, formData) {
       componentList.forEach(cur => {
         const config = cur.__config__
         if (cur.__vModel__) this.componentMaps[cur.__vModel__] = cur
         if (cur.data && cur.__config__.tableType === 'dynamic') { // 动态表格
-          if (!this.value.hasOwnProperty(cur.__vModel__)) {
-            if (this.isAddToForm(config)) {
-              this.addPropertyToFormData(cur.__vModel__, cur.data)
-            } else {
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
-            }
-          } else {
-            cur.data = this.value[cur.__vModel__]
-          }
+          this.$set(formData, cur.__vModel__, cur.data)
         } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'layout') {
           cur.data.forEach(item => {
-            for (const [, val] of Object.entries(item)) {
+            // eslint-disable-next-line no-unused-vars
+            for (const [key, val] of Object.entries(item)) {
               if (val.__config__.children.length > 0) {
                 val.__config__.children.forEach(v => {
-                  this.componentMaps[v.__vModel__] = v
-                  if (!this.value.hasOwnProperty(v.__vModel__)) {
-                    if (this.isAddToForm(v.__config__, val)) {
-                      this.addPropertyToFormData(v.__vModel__, v.__config__.defaultValue)
-                    } else {
-                      this.addPropertyToComponentModel(v.__vModel__, v.__config__.defaultValue)
-                    }
-                  }
+                  this.$set(formData, v.__vModel__, v.__config__.defaultValue)
                 })
               }
             }
@@ -317,30 +249,13 @@ export default {
             newData.push(temp)
           })
           cur.data = newData
-
-          if (!this.value.hasOwnProperty(cur.__vModel__)) {
-            if (this.isAddToForm(config, cur)) {
-              this.addPropertyToFormData(cur.__vModel__, cur.data)
-            } else {
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
-            }
-          } else {
-            cur.data = this.value[cur.__vModel__]
-          }
+          this.$set(formData, cur.__vModel__, cur.data)
         } else {
           if (cur.__vModel__) {
-            if (this.isAddToForm(config)) {
-              if (!this.value.hasOwnProperty(cur.__vModel__)) {
-                this.addPropertyToFormData(cur.__vModel__, cur.data)
-              }
-              this.addPropertyToFormData(cur.__vModel__, config.defaultValue)
-            } else {
-              this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue)
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
-            }
+            this.$set(formData, cur.__vModel__, config.defaultValue)
           }
         }
-        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children)
+        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children, formData)
       })
     },
     buildRules(componentList, rules) {
@@ -390,55 +305,78 @@ export default {
         if (config.children) this.buildRules(config.children, rules)
       })
     },
-
-    isAddToForm(config, scheme = {}) {
-      return !config.hasOwnProperty('isAddToForm') || config.isAddToForm
-    },
-
-    // 添加到formData方法
-    addPropertyToFormData(propKey, value) {
-      this.$set(this.value, propKey, value)
-    },
-
-    // 添加到组件数据
-    addPropertyToComponentModel(propKey, value) {
-      this.$set(this.componentModel, propKey, value)
-    },
-
-    fetch(url, params) {
-      return graphqlRequest({
-        url: `${this.$hostname}${url}`,
-        method: 'POST',
-        data: params
-      })
-    },
-    // 绑定事件
-    on(event, fn) {
-      if (this.scheme.on) {
-        this.$set(this.scheme.on, event, fn)
-      } else {
-        this.$set(this.scheme, 'on', {
-          [event]: fn
-        })
+    // 根据vModel设置form
+    setFormDataByValue() {
+      for (const [key, val] of Object.entries(this.value)) {
+        // eslint-disable-next-line no-prototype-builtins
+        if (this[FORM_MODEL].hasOwnProperty(key)) {
+          this[FORM_MODEL][key] = val
+          // 判断是否是数组类型并且是表格的数据依赖
+          if (Array.isArray(val)) {
+            // console.log(key, val)
+            const component = this.componentMaps[key]
+            if (component && component.__config__.tag === 'el-table') {
+              component.data = val
+              // console.log(this[FORM_MODEL], component)
+            }
+          }
+        }
       }
     },
-
-    // bindComponentsHook(componentList) {
-    //   componentList.forEach(component => {
-    //     if (component.__method__ && component.__method__.options) {
-    //       componentBuildHooks(component)
-    //     }
-    //     if (component.__config__ && component.__config__.children) this.bindComponentsHook(component.__config__.children)
-    //     if (component.data && component.__config__.tableType === 'layout') {
-    //       component.data.forEach(v => {
-    //         // eslint-disable-next-line no-unused-vars
-    //         for (const [key, value] of Object.entries(v)) {
-    //           this.bindComponentsHook(value.__config__.children)
-    //         }
-    //       })
-    //     }
-    //   })
-    // },
+    // 获取组件数据
+    getComponentByField(field) {
+      const component = this.handleGetComponent(this.formConfCopy.fields, field)
+      return component
+      // return new Proxy(component, {
+      //   get: (target, propKey, receiver) => {
+      //     // 拦截请求
+      //     if (propKey === 'fetchData') {
+      //       return (customParamsObj) => this.fetchData(component, customParamsObj)
+      //     }
+      //     return Reflect.get(target, propKey, receiver)
+      //   },
+      //   set: (target, propKey, value, receiver) => {
+      //     if (propKey === 'value') {
+      //       if (target.data) {
+      //         this.parserFormData[component.__vModel__] = value
+      //         component.data = value
+      //       }
+      //     }
+      //     return Reflect.set(target, propKey, value, receiver)
+      //   }
+      // })
+    },
+    handleGetComponent(componentList, field) {
+      let component = null
+      for (let i = 0; i < componentList.length; i++) {
+        const com = componentList[i]
+        if (com.__vModel__ === field) {
+          component = com
+        } else {
+          if (com.__config__.children) {
+            const temp = this.handleGetComponent(com.__config__.children, field)
+            if (temp) return temp
+          }
+        }
+      }
+      return component
+    },
+    bindComponentsHook(componentList) {
+      componentList.forEach(component => {
+        if (component.__method__ && component.__method__.options) {
+          componentBuildHooks(component)
+        }
+        if (component.__config__ && component.__config__.children) this.bindComponentsHook(component.__config__.children)
+        if (component.data && component.__config__.tableType === 'layout') {
+          component.data.forEach(v => {
+            // eslint-disable-next-line no-unused-vars
+            for (const [key, value] of Object.entries(v)) {
+              this.bindComponentsHook(value.__config__.children)
+            }
+          })
+        }
+      })
+    },
     // 设置表单状态
     setForm() {
       if (Object.keys(this.config).length === 0) return
@@ -456,14 +394,14 @@ export default {
           if (curr.operation === 'includes') {
             for (let i = 0; i < curr.value.length; i++) {
               const val = curr.value[i]
-              if (!this.value[curr.field].includes(val)) {
+              if (!this[FORM_MODEL][curr.field].includes(val)) {
                 result = false
                 break
               }
             }
           } else {
             // eslint-disable-next-line no-eval
-            result = eval(`${this.value[curr.field]}${curr.operation}${curr.value}`)
+            result = eval(`${this[FORM_MODEL][curr.field]}${curr.operation}${curr.value}`)
           }
           return [...prev, result]
         }, [])
@@ -477,13 +415,6 @@ export default {
         const config = component.__config__
         if (config.dataType === 'dynamic') {
           if (config.autoFetch) this.fetchData(component)
-        }
-        if (config.tag === 'el-table' && config.tableType === 'layout') {
-          component.data.forEach(item => {
-            config.children.forEach(column => {
-              this.getDynamicData(item[column.__config__.field].__config__.children)
-            })
-          })
         }
         if (config.children) this.getDynamicData(config.children)
       })
@@ -507,19 +438,19 @@ export default {
     // 普通提交
     submitForm() {
       // console.log(this.parserFormData.field105 === this.formConfCopy.fields[1].data)
-      console.log(this.value, { ...this.value })
+      console.log(this[FORM_MODEL])
       this.$refs[this.formConf.formRef].validate(valid => {
         if (!valid) return
         // const formData = this.getFormData()
-        // console.log(this.formConf, formData, this.value)
+        // console.log(this.formConf, formData, this[FORM_MODEL])
         // 触发sumit事件
-        this.$emit('submit', this.value)
+        this.$emit('submit', this[FORM_MODEL])
         return true
       })
     },
     getFormData() {
       // 处理数据
-      const formData = deepClone(this.value)
+      const formData = deepClone(this[FORM_MODEL])
       // 业务表格
       this.formConfCopy.fields.forEach(item => {
         if (item.__config__.layout === 'businessTable' || item.__config__.layout === 'dynamicFormTable' || item.__config__.layout === 'uploadTable') {
@@ -570,7 +501,12 @@ export default {
         }
 
         const paramsStr = paramsStrArr.length > 0 ? `(${paramsStrArr.join(',')})` : ''
-        const query = `{${graphqlMethod}${paramsStr}{${dataFieldStr}}}`
+
+        const query = `{
+            ${graphqlMethod}${paramsStr} {
+              ${dataFieldStr}
+            }
+          }`
         this.setLoading(component, true)
         graphqlRequest({
           url,
@@ -582,7 +518,7 @@ export default {
           this.setLoading(component, false)
           this.setRespData(component, resp.data.data)
           if (/businessTable|dynamicFormTable/.test(component.__config__.layout)) {
-            // this.value = this.getFormData()
+            // this[FORM_MODEL] = this.getFormData()
           }
         })
       }
@@ -613,7 +549,7 @@ export default {
       arr.reduce((pre, item, i) => {
         if (arr.length === i + 1) {
           if (item === 'data') {
-            this.$set(this.value, obj.__vModel__, val)
+            this.$set(this[FORM_MODEL], obj.__vModel__, val)
           }
           pre[item] = val
         } else if (Object.prototype.toString.call(pre[item]) !== '[Object Object]') {

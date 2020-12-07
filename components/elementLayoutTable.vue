@@ -82,7 +82,10 @@ export default {
             },
             scopedSlots: {
               default: ({ row, $index }) => {
-                return row[childConfig.field].__config__.children.length > 0 ? self.parser.renderChildren(h, row[childConfig.field], index) : h('span', {}, row[childConfig.field].__config__.defaultValue)
+                return row[childConfig.field].__config__.children.length > 0 ? self.parser.renderChildren(h, row[childConfig.field], index) : h('span', { class: {
+                  'cell-value': true,
+                  required: row[childConfig.field].__config__.required && row[childConfig.field].__config__.defaultValue
+                }}, row[childConfig.field].__config__.defaultValue)
               },
               header: ({ column }) => h('span', {}, column.label)
             }

@@ -4,6 +4,17 @@
 import render from '@/components/FormGenerator/render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
+const ruleTrigger = {
+  'el-input': 'blur',
+  'el-input-number': 'blur',
+  'el-select': 'change',
+  'el-radio-group': 'change',
+  'el-checkbox-group': 'change',
+  'el-cascader': 'change',
+  'el-time-picker': 'change',
+  'el-date-picker': 'change',
+  'el-rate': 'change'
+}
 
 export default {
   name: 'ColFormItem',
@@ -45,6 +56,30 @@ export default {
         }
       }
       return component
+    },
+    getRules() {
+      let rule = []
+      const regList = []
+      // 处理正则
+      const config = this.scheme.__config__
+      if (Array.isArray(config.regList)) {
+        if (config.required && this.parser.isAddToForm(config)) {
+          const required = { required: config.required, message: this.scheme.placeholder }
+          if (Array.isArray(config.defaultValue)) {
+            required.type = 'array'
+            required.message = `请至少选择一个${config.label}`
+          }
+          required.message === undefined && (required.message = `${config.label}不能为空`)
+          regList.push(required)
+        }
+        rule = regList.concat(config.regList).map(item => {
+          // eslint-disable-next-line no-eval
+          item.pattern && (item.pattern = eval(item.pattern))
+          item.trigger = ruleTrigger && ruleTrigger[config.tag]
+          return item
+        })
+      }
+      return rule
     }
   },
   render(h) {
@@ -57,7 +92,7 @@ export default {
       this.scheme.__config__.defaultValue = this.formData[this.scheme.__vModel__]
     }
     if (config.showLabel === false) labelWidth = '0'
-
+    const rules = this.getRules()
     return h('el-col', {
       attrs: {
         span: config.span
@@ -67,7 +102,7 @@ export default {
         labelWidth,
         prop: this.scheme.__vModel__,
         label: config.showLabel ? config.label : '',
-        rules: this.scheme.rules || {}
+        rules
       }
     }, [
       h('render', {

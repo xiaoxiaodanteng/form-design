@@ -132,6 +132,14 @@ export default {
               },
               scopedSlots: {
                 default: ({ row, $index }) => {
+                  // 显示内容不显示表单元素
+                  if (childConfig.showContent && !childConfig.showFormItem) return h('span', {}, row[childConfig.field])
+                  // 不显示内容也不显示表单元素
+                  if (!childConfig.showContent && !childConfig.showFormItem) return null
+                  // 显示表单元素不显示内容
+                  if (!childConfig.showContent && childConfig.showFormItem) return childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : h('span', {}, row[childConfig.field])
+
+                  // 默认
                   return childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : h('span', {}, row[childConfig.field])
                 },
                 header: ({ column }) => h('span', {}, column.label)

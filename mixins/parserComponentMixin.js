@@ -37,7 +37,6 @@ const layouts = {
     const config = scheme.__config__
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     if (config.showLabel === false) labelWidth = '0'
-    if (column.__config__.showContent !== undefined && !column.__config__.showContent) return null
     if (column.__config__.disabled !== undefined && column.__config__.disabled) {
       scheme.disabled = column.__config__.disabled
     }
@@ -157,9 +156,17 @@ export default {
     },
 
     setValue(event, config, scheme) {
-      this.$set(config, 'defaultValue', event)
-      if (this.parserFormData) {
-        this.$set(this.parserFormData, scheme.__vModel__, event)
+      // 转为数字
+      const isNumber = scheme.__config__.isNumber
+      let value = event
+      if (isNumber) {
+        if (!isNaN(value)) {
+          value = +value
+        }
+      }
+      this.$set(config, 'defaultValue', value)
+      if (this.parserFormData && this.isAddToForm(scheme.__config__)) {
+        this.$set(this.parserFormData, scheme.__vModel__, value)
       }
     },
 
@@ -173,7 +180,12 @@ export default {
         listeners[key] = event => methods[key].call(this, event)
       })
       // 响应 render.js 中的 vModel $emit('input', val)
-      listeners.input = event => this.setValue(event, config, scheme)
+      listeners.input = event => {
+        this.setValue(event, config, scheme)
+        if (scheme.on && scheme.on.input && typeof scheme.on.input === 'function') {
+          scheme.on.input(event)
+        }
+      }
 
       return listeners
     }

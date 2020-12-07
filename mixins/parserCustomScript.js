@@ -22,7 +22,6 @@ const componentConfigAttrs = [
 export default {
   data() {
     return {
-      componentFieldMaps: {}
     }
   },
   beforeCreate() {
@@ -42,31 +41,11 @@ export default {
     }
   },
   created() {
-    this.initComponentFieldMaps(this.formConfCopy.fields, this.componentFieldMaps)
-    // 初始化自定义脚本事件
-    this.runHook('created')
   },
   mounted() {
     this.runHook('mounted')
   },
   methods: {
-    initComponentFieldMaps(componentList, maps) {
-      componentList.forEach(component => {
-        if (component.__vModel__ && !maps[component.__vModel__]) {
-          maps[component.__vModel__] = component
-        }
-        if (component.__config__ && component.__config__.children) this.initComponentFieldMaps(component.__config__.children, maps)
-
-        if (component.data && component.__config__.tableType === 'layout') {
-          component.data.forEach(v => {
-            // eslint-disable-next-line no-unused-vars
-            for (const [key, value] of Object.entries(v)) {
-              this.initComponentFieldMaps(value.__config__.children, maps)
-            }
-          })
-        }
-      })
-    },
     iGetInnerText(testStr) {
       if (testStr === undefined) return ''
       var resultStr = testStr.replace(/\ +/g, '') // 去掉空格
@@ -79,10 +58,11 @@ export default {
       const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
+
       // console.log(`----执行${type}钩子---`)
       // console.log(fnStr)
       // console.log(`----执行${type}钩子结束---`)
-      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.$attrs.globalVar || this.$attrs['global-var'] || {})
+      this.hookHandler(fnStr, this.formConfCopy, this.parserFormData, this.componentModel, this.$attrs.globalVar || this.$attrs['global-var'] || {})
     },
     getHookStr(code) {
       const ast = parse(code)
@@ -147,8 +127,15 @@ export default {
 
       return generator(ast).code
     },
-
-    hookHandler(code, $this, $form, $props) {
+    /**
+     *
+     * @param {String} code 执行的代码
+     * @param {Object} $this 当前表单组件
+     * @param {Object} $form form
+     * @param {Object} $components components
+     * @param {Object} $props props
+     */
+    hookHandler(code, $this, $form, $components, $props) {
       try {
         // eslint-disable-next-line no-eval
         eval(`
@@ -161,7 +148,30 @@ export default {
     },
     // 获取组件数据
     getComponentByField(field) {
-      return this.componentFieldMaps[field]
+      const component = this.componentMaps[field]
+      return new Proxy(component, {
+        get: (target, propKey, receiver) => {
+          // 拦截请求
+          if (propKey === 'fetchData') {
+            return (customParamsObj) => this.fetchData(component, customParamsObj)
+          }
+          if (propKey === 'on') {
+            return (event, fn) => this.on(event, fn)
+          }
+          return Reflect.get(target, propKey, receiver)
+        },
+        set: (target, propKey, value, receiver) => {
+          if (propKey === 'value') {
+            if (target.data) {
+              this.parserFormData[component.__vModel__] = value
+              component.data = value
+            } else {
+              component.__config__.defaultValue = value
+            }
+          }
+          return Reflect.set(target, propKey, value, receiver)
+        }
+      })
     }
   }
 }
