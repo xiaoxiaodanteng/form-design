@@ -235,7 +235,6 @@ export default {
         this.$set(this.scheme, 'on', {
           [event]: fn
         })
-        console.log(this.scheme)
       }
     },
     // 执行钩子
@@ -243,7 +242,7 @@ export default {
       const code = this.iGetInnerText(this.scheme[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
-      console.log(fnStr)
+      // console.log(fnStr)
       this.hookHandler(fnStr, this.currentProxy(), this.formData, this.parser.componentModel, this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {})
     },
     /**

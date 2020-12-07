@@ -123,7 +123,6 @@ export default {
     },
     renderFrom(h) {
       const { formConfCopy, parserFormData } = this
-      console.log(parserFormData)
       return (
         <el-row gutter={formConfCopy.gutter}>
           <el-form

@@ -8,7 +8,7 @@ const headers = {
 
 // create an axios instance
 const service = axios.create({
-  baseURL: `${Vue.prototype.$hostname}`, // url = base url + request url
+  // baseURL: `${Vue.prototype.$hostname}`, // url = base url + request url
   // baseURL: `${window.origin}${process.env.VUE_APP_BASE_API}/api/data-workflow-process-erp`,
   // baseURL: `http://bi.dev.nearbyexpress.com/api/data-workflow-process-erp`,
   timeout: 100000 // request timeout
@@ -19,6 +19,7 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     // 针对post的请求设置
+    config.baseURL = `${Vue.prototype.$hostname}`
     config.headers = {
       ...config.headers,
       'ERP-Auth-Token': Vue.prototype.authToken || '',
