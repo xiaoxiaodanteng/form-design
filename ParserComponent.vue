@@ -105,6 +105,7 @@ export default {
             for (const [key, value] of Object.entries(this.value)) {
               if (this.parserFormData.hasOwnProperty(key)) {
                 this.parserFormData[key] = value
+                this.setValueByField(key, value)
               }
             }
             this.$emit('input', this.parserFormData)
@@ -206,24 +207,29 @@ export default {
           return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
-          // 判断是否是数组类型并且是表格的数据依赖
-          const component = this.componentMaps[propKey]
-          if (component) {
-            if (Array.isArray(value)) {
-            // console.log(key, val)
-              if (component && component.__config__.tag === 'el-table') {
-                component.data = value
-              } else {
-                component.__config__.defaultValue = value
-              }
-            }
-          }
+          this.setValueByField(propKey, value)
           return Reflect.set(target, propKey, value, receiver)
         }
       })
       this.parserFormData = proxyFormData
       this.$emit('input', proxyFormData)
       // console.log(this.value, proxyFormData)
+    },
+    setValueByField(field, value) {
+      // 判断是否是数组类型并且是表格的数据依赖
+      const component = this.componentMaps[field]
+      if (component) {
+        if (Array.isArray(value)) {
+          // console.log(key, val)
+          if (component && component.__config__.tag === 'el-table') {
+            component.data = value
+          } else if (component && component.__config__.tag === 'el-upload') {
+            component.fileList = value
+          } else {
+            component.__config__.defaultValue = value
+          }
+        }
+      }
     },
     setComponentConf(componentList) {
       componentList.forEach(component => {
@@ -294,6 +300,10 @@ export default {
                       this.addPropertyToFormData(v.__vModel__, v.__config__.defaultValue)
                     } else {
                       this.addPropertyToComponentModel(v.__vModel__, v.__config__.defaultValue)
+                    }
+                  } else {
+                    if (v.__config__.tag === 'el-upload') {
+                      v.fileList = this.value[v.__vModel__]
                     }
                   }
                 })
