@@ -39,6 +39,11 @@ export default {
       h('render', {
         props: {
           conf: scheme
+        },
+        on: {
+          close: event => {
+            console.log(event)
+          }
         }
       }, [
         child

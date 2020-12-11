@@ -3,7 +3,7 @@ import { emit } from './parseHooks'
 const componentFiles = require.context('./components', true, /\.vue$/)
 
 export { emit }
-import '@/styles/formGenerator/index.scss'
+// import '@/styles/formGenerator/index.scss'
 const ParserPlugin = {
   $Vue: {}
 }
