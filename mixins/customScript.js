@@ -60,6 +60,9 @@ export default {
       // 其他
       if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
       return this.scheme.__config__.defaultValue
+    },
+    parserProps() {
+      return this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {}
     }
   },
   watch: {
@@ -82,6 +85,13 @@ export default {
       immediate: true,
       handler() {
         this.runHook('watch')
+      }
+    },
+    parserProps: {
+      deep: true,
+      immediate: true,
+      handler() {
+        this.runHook('props')
       }
     }
   },
