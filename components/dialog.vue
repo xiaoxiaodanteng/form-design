@@ -4,7 +4,7 @@ import customScript from '@/components/FormGenerator/parser/mixins/customScript'
 import componentMixin from '@/components/FormGenerator/parser/mixins/componentMixin'
 
 export default {
-  name: 'PaddingItem',
+  name: 'ElementDialog',
   components: { render },
   mixins: [customScript, componentMixin],
   props: {
@@ -32,11 +32,17 @@ export default {
   },
   render(h) {
     const scheme = this.scheme
+    // const config = this.scheme.__config__
+    // if (!config.show) return null
+    const child = this.parser.renderChildren(h, this.scheme, this.index)
     return (
-      h('div', {
-        style: scheme.style
-      }, []
-      )
+      h('render', {
+        props: {
+          conf: scheme
+        }
+      }, [
+        child
+      ])
     )
   }
 }

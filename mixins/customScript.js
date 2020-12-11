@@ -243,7 +243,14 @@ export default {
       if (!code) return
       const fnStr = this.getHookStr(code)
       // console.log(fnStr)
-      this.hookHandler(fnStr, this.currentProxy(), this.formData, this.parser.componentModel, this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {})
+      this.hookHandler(
+        fnStr,
+        this.currentProxy(),
+        this.formData,
+        this.parser.componentModel,
+        this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {},
+        this.row
+      )
     },
     /**
      *
@@ -252,9 +259,10 @@ export default {
      * @param {Object} $form form
      * @param {Object} $components components
      * @param {Object} $props props
+     * @param {Object} $row el-table row
      * @param {Function} h 渲染函数
      */
-    hookHandler(code, $this, $form, $components, $props, h = this.$createElement) {
+    hookHandler(code, $this, $form, $components, $props, $row, h = this.$createElement) {
       try {
         // eslint-disable-next-line no-eval
         eval(`

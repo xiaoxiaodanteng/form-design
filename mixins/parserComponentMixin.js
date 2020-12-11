@@ -8,6 +8,18 @@ import rowFormItem from '../components/rowFormItem'
 import cardItem from '../components/cardItem'
 import paddingItem from '../components/paddingItem'
 
+const ruleTrigger = {
+  'el-input': 'blur',
+  'el-input-number': 'blur',
+  'el-select': 'change',
+  'el-radio-group': 'change',
+  'el-checkbox-group': 'change',
+  'el-cascader': 'change',
+  'el-time-picker': 'change',
+  'el-date-picker': 'change',
+  'el-rate': 'change'
+}
+
 const componentList = {
   tableColgroup(h, currentItem) {
     const config = currentItem.__config__
@@ -32,8 +44,10 @@ const layouts = {
   paddingItem: (h, scheme, index) => h('paddingItem', { props: { scheme, index }}),
   tipFormItem: (h, scheme, index) => h('tipFormItem', { props: { scheme, index }}),
   uploadTable: (h, scheme, index) => h('uploadTable', { props: { scheme, index }}),
+  elementDialog: (h, scheme, index) => h('elementDialog', { props: { scheme, index }}),
+  table_colFormItem: (h, scheme, column, columnIndex, row, rowParams, parent) => h('tableColFormItem', { props: { scheme, column, columnIndex, row: rowParams.row, parent, rowParams }}),
 
-  table_colFormItem(h, scheme, column, columnIndex, row, parent) {
+  table_colFormItem1(h, scheme, column, columnIndex, row, parent) {
     const config = scheme.__config__
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     if (config.showLabel === false) labelWidth = '0'
@@ -44,9 +58,11 @@ const layouts = {
       label: config.showLabel ? config.label : '',
       labelWidth
     }
+    const rules = this.getTableColumnRules(scheme, column)
+
     if (this.parserFormData[parent.__vModel__] && this.parserFormData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.children[0].__config__.required) {
       props.prop = `${parent.__vModel__}.${columnIndex}.${column.__config__.field}`
-      props.rules = column.rules || {}
+      props.rules = rules
     }
     return (
       <el-col span={config.span}>
@@ -56,10 +72,7 @@ const layouts = {
           data-prop={this.parserFormData[parent.__vModel__] && this.parserFormData[parent.__vModel__].length > 0 ? `${parent.__vModel__}.${columnIndex}.${column.__config__.field}` : null}
         >
           <render conf={{ ...scheme, __config__: { ...scheme.__config__, defaultValue: row[column.__config__.field] }}} onInput={event => {
-            // row[column.__config__.field] = event
             this.$set(row, column.__config__.field, event)
-            // console.log(this.parserFormData[parent.__vModel__] === parent.data, row)
-            // parent.data.forEach(item => console.log(item === row))
           }}/>
         </el-form-item>
       </el-col>
@@ -86,6 +99,31 @@ export default {
     paddingItem
   },
   methods: {
+    getTableColumnRules(scheme, column) {
+      let rule = []
+      const regList = []
+      // 处理正则
+      const config = scheme.__config__
+      const columnConfig = column.__config__
+      if (Array.isArray(config.regList)) {
+        if (columnConfig.required && this.isAddToForm(columnConfig)) {
+          const required = { required: columnConfig.required, message: scheme.placeholder }
+          if (Array.isArray(config.defaultValue)) {
+            required.type = 'array'
+            required.message = `请至少选择一个${config.label}`
+          }
+          required.message === undefined && (required.message = `${config.label}不能为空`)
+          regList.push(required)
+        }
+        rule = regList.concat(config.regList).map(item => {
+          // eslint-disable-next-line no-eval
+          item.pattern && (item.pattern = eval(item.pattern))
+          item.trigger = ruleTrigger && ruleTrigger[config.tag]
+          return item
+        })
+      }
+      return rule
+    },
     renderFormItem(h, elementList, root) {
       return elementList.map((scheme, i) => {
         const config = scheme.__config__
@@ -98,13 +136,13 @@ export default {
       })
     },
 
-    renderTableChildren(h, currentItem, columnIndex, data, parent) {
+    renderTableChildren(h, currentItem, columnIndex, data, rowParams, parent) {
       const config = currentItem.__config__
       if (!Array.isArray(config.children)) return null
       return config.children.map((el, i) => {
         const layout = this.layouts['table_' + el.__config__.layout]
         if (layout) {
-          return layout.call(this, h, el, currentItem, columnIndex, data, parent)
+          return layout.call(this, h, el, currentItem, columnIndex, data, rowParams, parent)
         }
         return this.layoutIsNotFound()
       })

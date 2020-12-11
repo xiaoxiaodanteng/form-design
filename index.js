@@ -15,9 +15,9 @@ ParserPlugin.install = (Vue, options = { hostname: 'http://bi.dev.nearbyexpress.
   console.log(options, ParserPlugin.$Vue.prototype)
   // 自动注册组件
   componentFiles.keys().forEach((filePath, index) => {
-    const componentName = filePath.replace(/^\.\/(.*)\.\w+$/, '$1')
+    // const componentName = filePath.replace(/^\.\/(.*)\.\w+$/, '$1')
     const component = componentFiles(filePath).default
-    Vue.component(componentName, component)
+    Vue.component(component.name, component)
   })
 }
 

@@ -293,20 +293,7 @@ export default {
           cur.data.forEach(item => {
             for (const [, val] of Object.entries(item)) {
               if (val.__config__.children.length > 0) {
-                val.__config__.children.forEach(v => {
-                  this.componentMaps[v.__vModel__] = v
-                  if (!this.value.hasOwnProperty(v.__vModel__)) {
-                    if (this.isAddToForm(v.__config__, val)) {
-                      this.addPropertyToFormData(v.__vModel__, v.__config__.defaultValue)
-                    } else {
-                      this.addPropertyToComponentModel(v.__vModel__, v.__config__.defaultValue)
-                    }
-                  } else {
-                    if (v.__config__.tag === 'el-upload') {
-                      v.fileList = this.value[v.__vModel__]
-                    }
-                  }
-                })
+                this.initFormData(val.__config__.children)
               }
             }
           })
@@ -343,7 +330,12 @@ export default {
             if (this.isAddToForm(config)) {
               if (!this.value.hasOwnProperty(cur.__vModel__)) {
                 this.addPropertyToFormData(cur.__vModel__, cur.data)
+              } else {
+                if (cur.__config__.tag === 'el-upload') {
+                  cur.fileList = this.value[cur.__vModel__]
+                }
               }
+
               this.addPropertyToFormData(cur.__vModel__, config.defaultValue)
             } else {
               this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue)
