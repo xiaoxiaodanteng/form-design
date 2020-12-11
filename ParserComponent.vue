@@ -168,9 +168,9 @@ export default {
           if (propKey === 'value') {
             return data
           }
-          console.log(propKey)
-          return 1
-          // return Reflect.get(target, propKey, receiver)
+          // console.log(propKey)
+          // return 1
+          return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
           // 判断是否是数组类型并且是表格的数据依赖
