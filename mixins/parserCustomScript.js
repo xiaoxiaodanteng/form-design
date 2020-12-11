@@ -105,6 +105,19 @@ export default {
               )
             }
           }
+
+          // 删除$component[field]的value
+          if (t.isMemberExpression(node.object) && node.object.object.name === '$component') {
+            if (node.property.name === 'value') {
+              path.replaceWith(
+                node.object
+              )
+            } else {
+              path.replaceWith(
+                parseExpression(`this.getComponentByField("${node.object.property.name}").${componentConfigAttrs.includes(node.property.name) ? '__config__.' : ''}${node.property.name}`)
+              )
+            }
+          }
         },
         AssignmentExpression(path) {
           // console.log(path, generator(path.node).code)
@@ -132,10 +145,10 @@ export default {
      * @param {String} code 执行的代码
      * @param {Object} $this 当前表单组件
      * @param {Object} $form form
-     * @param {Object} $components components
+     * @param {Object} $component components
      * @param {Object} $props props
      */
-    hookHandler(code, $this, $form, $components, $props) {
+    hookHandler(code, $this, $form, $component, $props) {
       try {
         // eslint-disable-next-line no-eval
         eval(`

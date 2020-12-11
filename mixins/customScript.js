@@ -183,6 +183,18 @@ export default {
               )
             }
           }
+          // 删除$form[field]的value
+          if (t.isMemberExpression(node.object) && node.object.object.name === '$component') {
+            if (node.property.name === 'value') {
+              path.replaceWith(
+                node.object
+              )
+            } else {
+              path.replaceWith(
+                parseExpression(`this.getComponentByField("${node.object.property.name}").${componentConfigAttrs.includes(node.property.name) ? '__config__.' : ''}${node.property.name}`)
+              )
+            }
+          }
         },
         AssignmentExpression(path) {
           // console.log(path, generator(path.node).code)
@@ -267,12 +279,12 @@ export default {
      * @param {String} code 执行的代码
      * @param {Object} $this 当前表单组件
      * @param {Object} $form form
-     * @param {Object} $components components
+     * @param {Object} $component components
      * @param {Object} $props props
      * @param {Object} $row el-table row
      * @param {Function} h 渲染函数
      */
-    hookHandler(code, $this, $form, $components, $props, $row, h = this.$createElement) {
+    hookHandler(code, $this, $form, $component, $props, $row, h = this.$createElement) {
       try {
         // eslint-disable-next-line no-eval
         eval(`

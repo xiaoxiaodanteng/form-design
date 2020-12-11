@@ -31,10 +31,10 @@ export default {
   methods: {
     submit() {
       this.$refs.dialogForm.validate((valid, object) => {
-        console.log(valid, object)
         if (!valid) return
         // 触发submit方法
         this.runHook('submit')
+        this.scheme.visible = false
       })
     }
   },
@@ -64,21 +64,6 @@ export default {
         }
       }, [
         // 弹窗的表单
-        /**
-         * <el-form
-            size={formConfCopy.size}
-            label-position={formConfCopy.labelPosition}
-            disabled={formConfCopy.disabled}
-            label-width={`${formConfCopy.labelWidth}px`}
-            ref={formConfCopy.formRef}
-            // model不能直接赋值 https://github.com/vuejs/jsx/issues/49#issuecomment-472013664
-            props={{ model: parserFormData }}
-            rules={this.parserFormRules}
-          >
-            {this.renderFormItem(h, formConfCopy.fields)}
-            {formConfCopy.formBtns && this.formBtns(h)}
-          </el-form>
-         */
         h('el-form', {
           props: {
             model: this.parser.parserFormData
@@ -95,9 +80,9 @@ export default {
         ]),
 
         h('div', { slot: 'footer', style: { 'text-align': scheme.center ? 'center' : 'right' }}, [
-          h('el-button', { props: { size: 'mini' }, on: { click: event => {
+          scheme['show-close'] ? h('el-button', { props: { size: 'mini' }, on: { click: event => {
             scheme.visible = false
-          } }}, config.cancelText || '取消'),
+          } }}, config.cancelText || '取消') : null,
           h('el-button', { props: { size: 'mini' }, on: { click: event => {
             this.$refs.dialogForm.resetFields()
           } }}, '重置'),

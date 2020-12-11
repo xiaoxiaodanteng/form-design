@@ -168,7 +168,7 @@ export default {
           if (propKey === 'value') {
             return data
           }
-          // console.log(propKey)
+          console.log(target, propKey, receiver)
           // return 1
           return Reflect.get(target, propKey, receiver)
         },
