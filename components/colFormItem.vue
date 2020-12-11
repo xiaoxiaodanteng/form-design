@@ -90,6 +90,7 @@ export default {
     if (this.formData && Object.keys(this.formData).includes(this.scheme.__vModel__)) {
       // console.log(this.formData[this.scheme.__vModel__])
       this.scheme.__config__.defaultValue = this.formData[this.scheme.__vModel__]
+      // console.log(this.scheme.__vModel__, this.scheme.__config__.defaultValue, this.formData)
     }
     if (config.showLabel === false) labelWidth = '0'
     const rules = this.getRules()

@@ -43,6 +43,7 @@ export default {
         on: {
           close: event => {
             console.log(event)
+            this.scheme.visible = false
           }
         }
       }, [

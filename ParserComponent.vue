@@ -47,7 +47,7 @@ export default {
   },
   provide() {
     return {
-      formData: this.value,
+      formData: this.parserFormData,
       parser: this
     }
   },
@@ -128,9 +128,8 @@ export default {
       this.handleUpdateModel(this.value)
       // 设置代理
       this.setModelToProxy(this.componentModel)
-      // console.log(this.value)
 
-      this.initFormData(this.formConfCopy.fields, this.value)
+      this.initFormData(this.formConfCopy.fields, this.parserFormData)
       // this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
 
       // 全局钩子
@@ -211,6 +210,7 @@ export default {
           return Reflect.set(target, propKey, value, receiver)
         }
       })
+
       this.parserFormData = proxyFormData
       this.$emit('input', proxyFormData)
       // console.log(this.value, proxyFormData)
@@ -275,25 +275,25 @@ export default {
       })
     },
     // 初始化执行
-    initFormData(componentList) {
+    initFormData(componentList, formData) {
       componentList.forEach(cur => {
         const config = cur.__config__
         if (cur.__vModel__) this.componentMaps[cur.__vModel__] = cur
         if (cur.data && cur.__config__.tableType === 'dynamic') { // 动态表格
-          if (!this.value.hasOwnProperty(cur.__vModel__)) {
+          if (!formData.hasOwnProperty(cur.__vModel__)) {
             if (this.isAddToForm(config)) {
               this.addPropertyToFormData(cur.__vModel__, cur.data)
             } else {
               this.addPropertyToComponentModel(cur.__vModel__, cur.data)
             }
           } else {
-            cur.data = this.value[cur.__vModel__]
+            cur.data = formData[cur.__vModel__]
           }
         } else if (cur.data && cur.data.length > 0 && cur.__config__.tableType === 'layout') {
           cur.data.forEach(item => {
             for (const [, val] of Object.entries(item)) {
               if (val.__config__.children.length > 0) {
-                this.initFormData(val.__config__.children)
+                this.initFormData(val.__config__.children, formData)
               }
             }
           })
@@ -316,24 +316,25 @@ export default {
           })
           cur.data = newData
 
-          if (!this.value.hasOwnProperty(cur.__vModel__)) {
+          if (!formData.hasOwnProperty(cur.__vModel__)) {
             if (this.isAddToForm(config, cur)) {
               this.addPropertyToFormData(cur.__vModel__, cur.data)
             } else {
               this.addPropertyToComponentModel(cur.__vModel__, cur.data)
             }
           } else {
-            cur.data = this.value[cur.__vModel__]
+            cur.data = formData[cur.__vModel__]
           }
         } else {
           if (cur.__vModel__) {
             if (this.isAddToForm(config)) {
-              if (!this.value.hasOwnProperty(cur.__vModel__)) {
+              if (!formData.hasOwnProperty(cur.__vModel__)) {
                 this.addPropertyToFormData(cur.__vModel__, cur.data)
               } else {
                 if (cur.__config__.tag === 'el-upload') {
-                  cur.fileList = this.value[cur.__vModel__]
+                  cur.fileList = formData[cur.__vModel__]
                 }
+                cur.__config__.defaultValue = formData[cur.__vModel__]
               }
 
               this.addPropertyToFormData(cur.__vModel__, config.defaultValue)
@@ -343,7 +344,7 @@ export default {
             }
           }
         }
-        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children)
+        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children, formData)
       })
     },
     buildRules(componentList, rules) {

@@ -52,5 +52,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/formGenerator/index.scss';
+// @import '@/styles/formGenerator/index.scss';
 </style>
