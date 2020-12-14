@@ -161,7 +161,7 @@ export default {
     },
     // 获取组件数据
     getComponentByField(field) {
-      const component = this.componentMaps[field]
+      const component = this.componentMaps[field] || {}
       return new Proxy(component, {
         get: (target, propKey, receiver) => {
           // 拦截请求

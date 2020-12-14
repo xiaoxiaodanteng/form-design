@@ -88,6 +88,12 @@ export default {
       }
     }
 
+    data.parserFormData = this.handleUpdateModel(data)
+    // 设置代理
+    this.setModelToProxy(data.componentModel, data)
+
+    this.initFormData(data.formConfCopy.fields, data.parserFormData, data)
+
     return data
   },
   watch: {
@@ -115,6 +121,10 @@ export default {
       }
     }
   },
+  beforeCreate() {
+    // console.log(this)
+
+  },
   created() {
     this.init()
     // 初始化自定义脚本事件
@@ -125,11 +135,11 @@ export default {
   methods: {
     // 初始化
     init() {
-      this.handleUpdateModel(this.value)
+      // this.handleUpdateModel(this.value)
       // 设置代理
-      this.setModelToProxy(this.componentModel)
+      // this.setModelToProxy(this.componentModel)
 
-      this.initFormData(this.formConfCopy.fields, this.parserFormData)
+      // this.initFormData(this.formConfCopy.fields, this.parserFormData)
       // this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
 
       // 全局钩子
@@ -162,22 +172,19 @@ export default {
         }
       }
     },
-    setModelToProxy(data) {
+    setModelToProxy(data, self = this) {
       const proxyFormData = new Proxy(data, {
         get: (target, propKey, receiver) => {
           if (propKey === 'value') {
             return data
           }
-          console.log(target, propKey, receiver)
-          // return 1
           return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
           // 判断是否是数组类型并且是表格的数据依赖
-          const component = this.componentMaps[propKey]
+          const component = self.componentMaps[propKey]
           if (component) {
             if (Array.isArray(value)) {
-            // console.log(key, val)
               if (component && component.__config__.tag === 'el-table') {
                 component.data = value
               } else {
@@ -190,10 +197,10 @@ export default {
           return Reflect.set(target, propKey, value, receiver)
         }
       })
-      this.componentModel = proxyFormData
+      self.componentModel = proxyFormData
     },
     // 设置代理
-    handleUpdateModel() {
+    handleUpdateModel(vm) {
       const proxyFormData = new Proxy(this.value, {
         get: (target, propKey, receiver) => {
           if (propKey === '__validated__') {
@@ -208,18 +215,17 @@ export default {
           return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
-          this.setValueByField(propKey, value)
+          this.setValueByField(propKey, value, vm)
           return Reflect.set(target, propKey, value, receiver)
         }
       })
 
-      this.parserFormData = proxyFormData
       this.$emit('input', proxyFormData)
-      // console.log(this.value, proxyFormData)
+      return proxyFormData
     },
-    setValueByField(field, value) {
+    setValueByField(field, value, vm = this) {
       // 判断是否是数组类型并且是表格的数据依赖
-      const component = this.componentMaps[field]
+      const component = vm.componentMaps[field]
       if (component) {
         if (Array.isArray(value)) {
           // console.log(key, val)
@@ -277,16 +283,16 @@ export default {
       })
     },
     // 初始化执行
-    initFormData(componentList, formData) {
+    initFormData(componentList, formData, self) {
       componentList.forEach(cur => {
         const config = cur.__config__
-        if (cur.__vModel__) this.componentMaps[cur.__vModel__] = cur
+        if (cur.__vModel__) self.componentMaps[cur.__vModel__] = cur
         if (cur.data && cur.__config__.tableType === 'dynamic') { // 动态表格
           if (!formData.hasOwnProperty(cur.__vModel__)) {
             if (this.isAddToForm(config)) {
-              this.addPropertyToFormData(cur.__vModel__, cur.data)
+              this.addPropertyToFormData(cur.__vModel__, cur.data, formData)
             } else {
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
+              this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
             }
           } else {
             cur.data = formData[cur.__vModel__]
@@ -295,7 +301,7 @@ export default {
           cur.data.forEach(item => {
             for (const [, val] of Object.entries(item)) {
               if (val.__config__.children.length > 0) {
-                this.initFormData(val.__config__.children, formData)
+                this.initFormData(val.__config__.children, formData, self)
               }
             }
           })
@@ -320,9 +326,9 @@ export default {
 
           if (!formData.hasOwnProperty(cur.__vModel__)) {
             if (this.isAddToForm(config, cur)) {
-              this.addPropertyToFormData(cur.__vModel__, cur.data)
+              this.addPropertyToFormData(cur.__vModel__, cur.data, formData)
             } else {
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
+              this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
             }
           } else {
             cur.data = formData[cur.__vModel__]
@@ -331,7 +337,7 @@ export default {
           if (cur.__vModel__) {
             if (this.isAddToForm(config)) {
               if (!formData.hasOwnProperty(cur.__vModel__)) {
-                this.addPropertyToFormData(cur.__vModel__, cur.data)
+                this.addPropertyToFormData(cur.__vModel__, cur.data, formData)
               } else {
                 if (cur.__config__.tag === 'el-upload') {
                   cur.fileList = formData[cur.__vModel__]
@@ -339,14 +345,14 @@ export default {
                 cur.__config__.defaultValue = formData[cur.__vModel__]
               }
 
-              this.addPropertyToFormData(cur.__vModel__, config.defaultValue)
+              this.addPropertyToFormData(cur.__vModel__, config.defaultValue, formData)
             } else {
-              this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue)
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data)
+              this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue, self.componentModel)
+              this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
             }
           }
         }
-        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children, formData)
+        if (config.children && config.tag !== 'el-table-column') this.initFormData(config.children, formData, self)
       })
     },
     buildRules(componentList, rules) {
@@ -402,13 +408,13 @@ export default {
     },
 
     // 添加到formData方法
-    addPropertyToFormData(propKey, value) {
-      this.$set(this.value, propKey, value)
+    addPropertyToFormData(propKey, value, formData) {
+      this.$set(formData, propKey, value)
     },
 
     // 添加到组件数据
-    addPropertyToComponentModel(propKey, value) {
-      this.$set(this.componentModel, propKey, value)
+    addPropertyToComponentModel(propKey, value, componentModel) {
+      this.$set(componentModel, propKey, value)
     },
 
     fetch(url, params) {
