@@ -53,30 +53,24 @@ export default {
           close: event => {
             this.scheme.visible = false
           }
-        },
-        scopedSlots: {
-          default: () => {
-            return h('div', { slot: 'footer' }, [
-              h('el-button', { props: { size: 'mini' }}, config.cancelText || '取消'),
-              h('el-button', { props: { type: 'primary', size: 'mini' }}, config.okText || '确定')
-            ])
-          }
         }
       }, [
         // 弹窗的表单
-        h('el-form', {
-          props: {
-            model: this.parser.parserFormData
-          },
-          ref: 'dialogForm',
-          attrs: {
-            'label-width': `${this.parser.formConfCopy.labelWidth}px`,
-            'label-position': this.parser.formConfCopy.labelPosition,
-            size: this.parser.formConfCopy.size,
-            disabled: this.parser.formConfCopy.disabled
-          }
-        }, [
-          child
+        h('el-row', {}, [
+          h('el-form', {
+            props: {
+              model: this.parser.parserFormData
+            },
+            ref: 'dialogForm',
+            attrs: {
+              'label-width': `${this.parser.formConfCopy.labelWidth}px`,
+              'label-position': this.parser.formConfCopy.labelPosition,
+              size: this.parser.formConfCopy.size,
+              disabled: this.parser.formConfCopy.disabled
+            }
+          }, [
+            child
+          ])
         ]),
 
         h('div', { slot: 'footer', style: { 'text-align': scheme.center ? 'center' : 'right' }}, [

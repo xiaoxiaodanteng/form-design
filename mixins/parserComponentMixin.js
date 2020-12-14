@@ -204,8 +204,9 @@ export default {
       }
       this.$set(config, 'defaultValue', value)
       if (this.parserFormData && this.isAddToForm(scheme.__config__)) {
-        // console.log(value)
         this.$set(this.parserFormData, scheme.__vModel__, value)
+      } else {
+        this.$set(this.componentModel, scheme.__vModel__, value)
       }
     },
 

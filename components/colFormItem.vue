@@ -87,10 +87,11 @@ export default {
     if (!config.show) return null
     const listeners = this.parser.buildListeners(this.scheme)
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
-    if (this.formData && Object.keys(this.formData).includes(this.scheme.__vModel__)) {
-      // console.log(this.formData[this.scheme.__vModel__])
+    // 表单元素
+    if (this.formData && Object.keys(this.formData).includes(this.scheme.__vModel__) && this.parser.isAddToForm(config)) {
       this.scheme.__config__.defaultValue = this.formData[this.scheme.__vModel__]
-      // console.log(this.scheme.__vModel__, this.scheme.__config__.defaultValue, this.formData)
+    } else { // 非表单元素
+      this.scheme.__config__.defaultValue = this.parser.componentModel[this.scheme.__vModel__]
     }
     if (config.showLabel === false) labelWidth = '0'
     const rules = this.getRules()

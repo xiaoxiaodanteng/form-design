@@ -89,6 +89,7 @@ export default {
     }
 
     data.parserFormData = this.handleUpdateModel(data)
+    console.log({ ...data.parserFormData })
     // 设置代理
     this.setModelToProxy(data.componentModel, data)
 
@@ -172,7 +173,7 @@ export default {
         }
       }
     },
-    setModelToProxy(data, self = this) {
+    setModelToProxy(data, vm = this) {
       const proxyFormData = new Proxy(data, {
         get: (target, propKey, receiver) => {
           if (propKey === 'value') {
@@ -181,23 +182,11 @@ export default {
           return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
-          // 判断是否是数组类型并且是表格的数据依赖
-          const component = self.componentMaps[propKey]
-          if (component) {
-            if (Array.isArray(value)) {
-              if (component && component.__config__.tag === 'el-table') {
-                component.data = value
-              } else {
-                component.__config__.defaultValue = value
-              }
-            } else {
-              component.__config__.defaultValue = value
-            }
-          }
+          this.setValueByField(propKey, value, vm)
           return Reflect.set(target, propKey, value, receiver)
         }
       })
-      self.componentModel = proxyFormData
+      vm.componentModel = proxyFormData
     },
     // 设置代理
     handleUpdateModel(vm) {
@@ -344,8 +333,6 @@ export default {
                 }
                 cur.__config__.defaultValue = formData[cur.__vModel__]
               }
-
-              this.addPropertyToFormData(cur.__vModel__, config.defaultValue, formData)
             } else {
               this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue, self.componentModel)
               this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
