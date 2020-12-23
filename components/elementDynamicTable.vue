@@ -2,6 +2,7 @@
 import render from '@/components/FormGenerator/render/render.js'
 import customScript from '@/components/FormGenerator/parser/mixins/customScript'
 import componentMixin from '@/components/FormGenerator/parser/mixins/componentMixin'
+import Vue from 'vue'
 
 export default {
   name: 'ElementDynamicTable',
@@ -65,6 +66,10 @@ export default {
     }
   },
   render(h) {
+    console.log(Vue.compile(`
+      <div class="a">234</div>
+    `))
+
     const scheme = this.scheme
     const config = this.scheme.__config__
     const self = this
@@ -82,6 +87,9 @@ export default {
         this.$message.error('序号自定义函数配置错误')
       }
     }
+    // return Vue.compile(`
+    //   <div class="a">234</div>
+    // `).render.call(this)
     return h('el-col', {
       attrs: { span: config.span }
     }, [

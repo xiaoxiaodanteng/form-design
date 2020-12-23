@@ -89,7 +89,6 @@ export default {
     }
 
     data.parserFormData = this.handleUpdateModel(data)
-    console.log({ ...data.parserFormData })
     // 设置代理
     this.setModelToProxy(data.componentModel, data)
 
@@ -200,6 +199,8 @@ export default {
             return isValidated
           } else if (propKey === 'value') {
             return this.value
+          } else if (propKey === 'validateField') {
+            return this.$refs[this.formConf.formRef].validateField
           }
           return Reflect.get(target, propKey, receiver)
         },
@@ -421,23 +422,6 @@ export default {
         })
       }
     },
-
-    // bindComponentsHook(componentList) {
-    //   componentList.forEach(component => {
-    //     if (component.__method__ && component.__method__.options) {
-    //       componentBuildHooks(component)
-    //     }
-    //     if (component.__config__ && component.__config__.children) this.bindComponentsHook(component.__config__.children)
-    //     if (component.data && component.__config__.tableType === 'layout') {
-    //       component.data.forEach(v => {
-    //         // eslint-disable-next-line no-unused-vars
-    //         for (const [key, value] of Object.entries(v)) {
-    //           this.bindComponentsHook(value.__config__.children)
-    //         }
-    //       })
-    //     }
-    //   })
-    // },
     // 设置表单状态
     setForm() {
       if (Object.keys(this.config).length === 0) return
