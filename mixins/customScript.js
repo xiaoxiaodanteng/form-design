@@ -127,6 +127,7 @@ export default {
     },
     getHookStr(code) {
       const ast = parse(code)
+      const vm = this
       // 转换变量信息
       traverse(ast, {
         enter(path) {
@@ -148,9 +149,10 @@ export default {
           if (node.object.name === '$this') {
             // 改变form value值
             if (node.property.name === 'value') {
+              const isFormItem = vm.parser.isAddToForm(vm.scheme.__config__)
               // 替换
               path.replaceWith(
-                parseExpression('$form[$this.__vModel__]')
+                parseExpression(`$${isFormItem ? 'form' : 'component'}[$this.__vModel__]`)
               )
             }
             // 改变自身值

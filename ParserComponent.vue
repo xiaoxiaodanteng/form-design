@@ -93,6 +93,7 @@ export default {
     this.setModelToProxy(data.componentModel, data)
 
     this.initFormData(data.formConfCopy.fields, data.parserFormData, data)
+    // console.log(data.parserFormData)
 
     return data
   },
@@ -327,7 +328,7 @@ export default {
           if (cur.__vModel__) {
             if (this.isAddToForm(config)) {
               if (!formData.hasOwnProperty(cur.__vModel__)) {
-                this.addPropertyToFormData(cur.__vModel__, cur.data, formData)
+                this.addPropertyToFormData(cur.__vModel__, cur.data || cur.__config__.defaultValue, formData)
               } else {
                 if (cur.__config__.tag === 'el-upload') {
                   cur.fileList = formData[cur.__vModel__]
@@ -335,8 +336,11 @@ export default {
                 cur.__config__.defaultValue = formData[cur.__vModel__]
               }
             } else {
-              this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue, self.componentModel)
-              this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
+              if (cur.data) {
+                this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
+              } else {
+                this.addPropertyToComponentModel(cur.__vModel__, config.defaultValue, self.componentModel)
+              }
             }
           }
         }
