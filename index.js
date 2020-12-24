@@ -2,6 +2,8 @@ import Parser from './Parser'
 import { emit } from './parseHooks'
 const componentFiles = require.context('./components', true, /\.vue$/)
 
+import Tinymce from '../tinymce/index.vue'
+
 export { emit }
 // import '@/styles/formGenerator/index.scss'
 const ParserPlugin = {
@@ -9,6 +11,7 @@ const ParserPlugin = {
 }
 ParserPlugin.install = (Vue, options = { hostname: 'http://bi.dev.nearbyexpress.com' }) => {
   Vue.component(Parser.name, Parser)
+  Vue.component('tinymce', Tinymce)
 
   ParserPlugin.$Vue = Vue
   ParserPlugin.$Vue.prototype.$hostname = options.hostname
