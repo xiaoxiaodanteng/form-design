@@ -137,26 +137,11 @@ export default {
     this.runHook('created')
   },
   mounted() {
+    console.log(this)
   },
   methods: {
     // 初始化
     init() {
-      // this.handleUpdateModel(this.value)
-      // 设置代理
-      // this.setModelToProxy(this.componentModel)
-
-      // this.initFormData(this.formConfCopy.fields, this.parserFormData)
-      // this.buildRules(this.formConfCopy.fields, this[FORM_RULES])
-
-      // 全局钩子
-      // buildHooks(this)
-
-      // 事件
-      // this.hasEventComponentList = this.getHasEventComponentList(this.formConfCopy.fields)
-      // 添加钩子
-      // this.bindComponentsHook(this.formConfCopy.fields)
-      // 绑定钩子事件
-      // this.addHookListener(this.formConfCopy.fields)
       // 设置表单
       this.setForm()
       // 请求异步数据
@@ -197,18 +182,28 @@ export default {
     handleUpdateModel(vm) {
       const proxyFormData = new Proxy(this.value, {
         get: (target, propKey, receiver) => {
-          if (propKey === '__validated__') {
-            let isValidated
-            this.$refs[this.formConf.formRef].validate(valid => {
-              isValidated = valid
-            })
-            return isValidated
-          } else if (propKey === 'value') {
-            return this.value
-          } else if (propKey === 'validateField') {
-            return this.$refs[this.formConf.formRef].validateField
+          switch (propKey) {
+            case '__validated__':
+            {
+              let isValidated
+              this.$refs[this.formConf.formRef].validate(valid => {
+                isValidated = valid
+              })
+              return isValidated
+            }
+            case 'value':
+              return this.value
+            case 'clearValidate':
+              return this.$refs[this.formConf.formRef].clearValidate
+            case 'resetFields':
+              return this.$refs[this.formConf.formRef].resetFields
+            case 'validate':
+              return this.$refs[this.formConf.formRef].validate
+            case 'validateField':
+              return this.$refs[this.formConf.formRef].validateField
+            default:
+              return Reflect.get(target, propKey, receiver)
           }
-          return Reflect.get(target, propKey, receiver)
         },
         set: (target, propKey, value, receiver) => {
           this.setValueByField(propKey, value, vm)
@@ -557,7 +552,6 @@ export default {
           !!key && paramsStrArr.push(`${key}:"${value}"`)
         }
 
-        console.log(params)
         // 动态参数
         for (const [key, value] of Object.entries(customParamObj)) {
           if (key) {

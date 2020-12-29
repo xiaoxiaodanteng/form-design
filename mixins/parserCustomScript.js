@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     $props() {
-      return this.$attrs.globalVar || this.$attrs['global-var']
+      return this.globalVar || this.$attrs['global-var']
     }
   },
   watch: {

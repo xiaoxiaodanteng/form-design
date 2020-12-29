@@ -272,7 +272,7 @@ export default {
         this.currentProxy(),
         this.formData,
         this.parser.componentModel,
-        this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {},
+        this.parser.globalVar || this.parser.$attrs['global-var'] || {},
         this.row
       )
     },
