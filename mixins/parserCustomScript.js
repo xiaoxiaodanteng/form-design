@@ -35,6 +35,7 @@ export default {
   watch: {
     $props: {
       deep: true,
+      immediate: true,
       handler() {
         this.runHook('props')
       }
