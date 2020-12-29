@@ -88,6 +88,7 @@ export default {
       const config = scheme.__config__
       const columnConfig = column.__config__
       if (Array.isArray(config.regList)) {
+        console.log(columnConfig)
         if (columnConfig.required && this.parser.isAddToForm(columnConfig)) {
           const required = { required: columnConfig.required, message: scheme.placeholder }
           if (Array.isArray(config.defaultValue)) {

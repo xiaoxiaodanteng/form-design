@@ -31,6 +31,7 @@ export default {
     render
   },
   mixins: [__method__, parserComponentMixin, parserCustomScript],
+  inheritAttrs: false,
   props: {
     formConf: {
       type: Object,
@@ -41,6 +42,10 @@ export default {
       default: () => ({})
     },
     value: {
+      type: Object,
+      default: () => ({})
+    },
+    globalVar: {
       type: Object,
       default: () => ({})
     }
@@ -296,6 +301,7 @@ export default {
               }
             }
           })
+          this.addPropertyToComponentModel(cur.__vModel__, cur.data, self.componentModel)
         } else if (cur.__config__ && cur.__config__.tableType === 'static') { // 静态表格
           const newData = []
           cur.data.forEach((data, index) => {
@@ -518,7 +524,7 @@ export default {
     },
 
     fetchData(component, customParamObj = {}) {
-      const { dataPath, dataType, url, defaultParams, graphqlMethod, dependencies, dataFields } = component.__config__
+      const { dataPath, dataType, url, defaultParams, propParams, graphqlMethod, dependencies, dataFields } = component.__config__
       if (dataType === 'dynamic' && url && graphqlMethod && dataPath) {
         const params = {}
         const paramsStrArr = []
@@ -536,9 +542,22 @@ export default {
             !!field && (params[field] = formData[field])
           })
         }
+        // prop参数
+        if (propParams) {
+          propParams.forEach(item => {
+            if (item && item.fieldPath.includes('.')) {
+              const fieldValue = item.fieldPath.split('.').reduce((pre, cur) => pre[cur], this.globalVar)
+              params[item.field] = fieldValue
+            } else {
+              !!item && (params[item.field] = this.globalVar[item.fieldPath])
+            }
+          })
+        }
         for (const [key, value] of Object.entries(params)) {
           !!key && paramsStrArr.push(`${key}:"${value}"`)
         }
+
+        console.log(params)
         // 动态参数
         for (const [key, value] of Object.entries(customParamObj)) {
           if (key) {
