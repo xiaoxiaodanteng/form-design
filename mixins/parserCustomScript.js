@@ -55,7 +55,7 @@ export default {
       return resultStr
     },
     // 执行钩子
-    runHook(type) {
+    runHook(type, newForm, oldForm) {
       const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
@@ -63,7 +63,7 @@ export default {
       // console.log(`----执行${type}钩子---`)
       // console.log(fnStr)
       // console.log(`----执行${type}钩子结束---`)
-      this.hookHandler(fnStr, this.formConfCopy, this.value, this.componentModel, this.$attrs.globalVar || this.$attrs['global-var'] || {})
+      this.hookHandler(fnStr, this.formConfCopy, this.value, oldForm, this.componentModel, this.$props)
     },
     getHookStr(code) {
       const ast = parse(code)
@@ -146,10 +146,11 @@ export default {
      * @param {String} code 执行的代码
      * @param {Object} $this 当前表单组件
      * @param {Object} $form form
+     * @param {Object} $oldForm
      * @param {Object} $component components
      * @param {Object} $props props
      */
-    hookHandler(code, $this, $form, $component, $props) {
+    hookHandler(code, $this, $form, $oldForm, $component, $props) {
       try {
         // eslint-disable-next-line no-eval
         eval(`

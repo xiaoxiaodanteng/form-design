@@ -53,16 +53,17 @@ export default {
     },
 
     componentValue() {
-      // 数组数据
-      if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
-        return this.scheme.data
+      if (this.parser.isAddToForm) {
+        return this.parser.isAddToForm(this.scheme.__config__) ? this.formData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
+      } else {
+        // 数组数据
+        if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
+          return this.scheme.data
+        }
+        // 其他
+        if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
+        return this.scheme.__config__.defaultValue
       }
-      // 其他
-      if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
-      return this.scheme.__config__.defaultValue
-    },
-    parserProps() {
-      return this.parser.$attrs.globalVar || this.parser.$attrs['global-var'] || {}
     }
   },
   watch: {
@@ -79,19 +80,18 @@ export default {
     mountedCode() {
       this.runHook('mounted')
     },
+    scheme: {
+      deep: true,
+      immediate: true,
+      handler() {
+      }
+    },
     // 值变化
     componentValue: {
       deep: true,
       immediate: true,
       handler() {
         this.runHook('watch')
-      }
-    },
-    parserProps: {
-      deep: true,
-      immediate: true,
-      handler() {
-        this.runHook('props')
       }
     }
   },
@@ -235,7 +235,7 @@ export default {
           set: (target, propKey, value, receiver) => {
             if (propKey === 'value') {
               if (target.data) {
-                this.parserFormData[this.scheme.__vModel__] = value
+                this.formData[this.scheme.__vModel__] = value
               }
             }
             return Reflect.set(target, propKey, value, receiver)

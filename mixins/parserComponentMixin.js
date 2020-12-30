@@ -46,6 +46,7 @@ const layouts = {
   uploadTable: (h, scheme, index) => h('uploadTable', { props: { scheme, index }}),
   elementDialog: (h, scheme, index) => h('elementDialog', { props: { scheme, index }}),
   table_colFormItem: (h, scheme, column, columnIndex, row, rowParams, parent) => h('tableColFormItem', { props: { scheme, column, columnIndex, row: rowParams.row, parent, rowParams }}),
+  customComponent: (h, scheme, index) => h('customComponent', { props: { scheme, index }}),
 
   table_colFormItem1(h, scheme, column, columnIndex, row, parent) {
     const config = scheme.__config__

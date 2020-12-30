@@ -2,7 +2,6 @@
 import render from '@/components/FormGenerator/render/render.js'
 import customScript from '@/components/FormGenerator/parser/mixins/customScript'
 import componentMixin from '@/components/FormGenerator/parser/mixins/componentMixin'
-import Vue from 'vue'
 
 export default {
   name: 'ElementDynamicTable',
@@ -66,10 +65,6 @@ export default {
     }
   },
   render(h) {
-    console.log(Vue.compile(`
-      <div class="a">234</div>
-    `))
-
     const scheme = this.scheme
     const config = this.scheme.__config__
     const self = this

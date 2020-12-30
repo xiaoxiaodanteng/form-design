@@ -94,6 +94,7 @@ export default {
       this.scheme.__config__.defaultValue = this.parser.componentModel[this.scheme.__vModel__]
     }
     if (config.showLabel === false) labelWidth = '0'
+
     const rules = this.getRules()
     return h('el-col', {
       attrs: {

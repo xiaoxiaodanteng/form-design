@@ -9,7 +9,7 @@ import __method__ from '@/components/FormGenerator/mixins/__method__'
 
 import parserComponentMixin from './mixins/parserComponentMixin'
 import parserCustomScript from './mixins/parserCustomScript'
-import { debounce } from 'throttle-debounce'
+// import { debounce } from 'throttle-debounce'
 const ruleTrigger = {
   'el-input': 'blur',
   'el-input-number': 'blur',
@@ -62,8 +62,6 @@ export default {
       // [FORM_MODEL]: {},
       [FORM_RULES]: {},
 
-      updateModel: debounce(200, this.handleUpdateModel),
-
       componentModel: {}, // 存放不添加到formData的组件数据
 
       componentMaps: {} // 组件key:component
@@ -112,18 +110,17 @@ export default {
     value: {
       deep: true,
       handler(newVal, oldVal) {
-        if (Object.keys(this.value).length > 0) {
-          if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
+        if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
+          if (Object.keys(this.value).length > 0) {
             for (const [key, value] of Object.entries(this.value)) {
               if (this.parserFormData.hasOwnProperty(key)) {
                 this.parserFormData[key] = value
-                this.setValueByField(key, value)
               }
             }
             this.$emit('input', this.parserFormData)
           }
         }
-        this.runHook('watch')
+        this.runHook('watch', newVal, oldVal)
       }
     }
   },
@@ -137,7 +134,6 @@ export default {
     this.runHook('created')
   },
   mounted() {
-    console.log(this)
   },
   methods: {
     // 初始化
@@ -154,7 +150,6 @@ export default {
           this.value[key] = val
           // 判断是否是数组类型并且是表格的数据依赖
           if (Array.isArray(val)) {
-            // console.log(key, val)
             const component = this.componentMaps[key]
             if (component && component.__config__.tag === 'el-table') {
               component.data = val
@@ -227,6 +222,8 @@ export default {
           } else {
             component.__config__.defaultValue = value
           }
+        } else {
+          component.__config__.defaultValue = value
         }
       }
     },
