@@ -1,6 +1,6 @@
 <script>
 import { deepClone } from '@/utils/formGenerator/index'
-import render from '@/components/FormGenerator/render/render.js'
+import render from '@/components/FormGenerator/parser/render/render.js'
 // import { buildHooks } from './parseHooks'
 import graphqlRequest from './graphqlRequest'
 import __method__ from '@/components/FormGenerator/mixins/__method__'

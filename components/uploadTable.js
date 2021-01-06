@@ -1,11 +1,9 @@
-import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 import { parseTime } from '../utils/index.js'
 
 export default {
   name: 'UploadTable',
-  components: { render },
   mixins: [customScript, componentMixin],
   props: {
     scheme: {

@@ -1,11 +1,9 @@
-import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 import axios from 'axios'
 
 export default {
   name: 'CustomTable',
-  components: { render },
   mixins: [customScript, componentMixin],
   props: {
     scheme: {

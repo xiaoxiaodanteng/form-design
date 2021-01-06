@@ -1,10 +1,8 @@
-import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
   name: 'DynamicFormTable',
-  components: { render },
   mixins: [
     customScript,
     componentMixin

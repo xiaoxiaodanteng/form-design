@@ -1,5 +1,5 @@
 
-import { createHash, deepClone } from './utils/'
+import { createHash, deepClone } from '../utils/'
 export default {
   methods: {
     drawingItemCopy(item, list) {

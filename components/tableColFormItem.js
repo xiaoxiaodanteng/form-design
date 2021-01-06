@@ -1,5 +1,4 @@
 
-import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 const ruleTrigger = {
@@ -16,7 +15,6 @@ const ruleTrigger = {
 
 export default {
   name: 'TableColFormItem',
-  components: { render },
   mixins: [customScript, componentMixin],
   props: {
     scheme: {

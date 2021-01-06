@@ -1,10 +1,8 @@
-import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 
 export default {
   name: 'RowFormItem',
-  components: { render },
   mixins: [customScript, componentMixin],
   props: {
     scheme: {
