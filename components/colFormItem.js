@@ -17,7 +17,7 @@ const ruleTrigger = {
 export default {
   name: 'ColFormItem',
   components: { render },
-  mixins: [customScript, componentMixin],
+  mixins: [customScript, componentMixin, componentMixin],
   inheritAttrs: false,
   props: {
     scheme: {
