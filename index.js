@@ -2,7 +2,7 @@ import Parser from './parser.js'
 import { emit } from './parseHooks'
 const componentFiles = require.context('./components', true, /\.js$/)
 
-import Tinymce from '../tinymce/index.vue'
+import Tinymce from './tinymce/index.vue'
 
 export { emit }
 // import '@/styles/formGenerator/index.scss'
