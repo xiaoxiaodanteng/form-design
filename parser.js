@@ -408,7 +408,7 @@ export default {
             console.log(this.activeId, config.formId)
           }
         }
-
+        console.log(scheme, index, children)
         return h(scheme.__config__.layout, {
           props: { scheme, index, parentList: children },
           class: className,
