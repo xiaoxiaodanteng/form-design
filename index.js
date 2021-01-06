@@ -1,6 +1,6 @@
 import Parser from './parser.js'
 import { emit } from './parseHooks'
-const componentFiles = require.context('./components', true, /\.vue$/)
+const componentFiles = require.context('./components', true, /\.js$/)
 
 import Tinymce from '../tinymce/index.vue'
 
