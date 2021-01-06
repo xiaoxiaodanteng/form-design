@@ -1,7 +1,5 @@
-import {
-  deepClone
-} from '@/utils/formGenerator/index'
-import { createHash } from '@/utils/'
+
+import { createHash, deepClone } from './utils/'
 export default {
   methods: {
     drawingItemCopy(item, list) {

@@ -1,4 +1,4 @@
-import render from '@/components/FormGenerator/render/render.js'
+import render from '../render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
 

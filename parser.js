@@ -2,10 +2,7 @@ import graphqlRequest from './graphqlRequest'
 import parserCustomScript from './mixins/parserCustomScript'
 
 import parserEditorMixin from './mixins/parserEditorMixin'
-import componentMixin from './mixins/componentMixin'
 import fetchMixin from './mixins/fetchMixin'
-import com from './components/colFormItem'
-console.log(com)
 // const componentFiles = require.context('./components', true, /\.js$/)
 // const components = {}
 // componentFiles.keys().forEach((filePath, index) => {
@@ -13,10 +10,10 @@ console.log(com)
 //   const component = componentFiles(filePath).default
 //   components[component.name] = component
 // })
-import { createHash } from '@/utils/'
+import { createHash } from './utils/'
 export default {
   name: 'Parser',
-  mixins: [parserCustomScript, parserEditorMixin, fetchMixin, componentMixin],
+  mixins: [parserCustomScript, parserEditorMixin, fetchMixin],
   inheritAttrs: false,
   props: {
     mode: {

@@ -1,6 +1,6 @@
 import Parser from './parser.js'
 import { emit } from './parseHooks'
-// const componentFiles = require.context('./components', true, /\.js$/)
+const componentFiles = require.context('./components', true, /\.js$/)
 
 import Tinymce from '../tinymce/index.vue'
 
@@ -17,11 +17,11 @@ ParserPlugin.install = (Vue, options = { hostname: 'http://bi.dev.nearbyexpress.
   ParserPlugin.$Vue.prototype.$hostname = options.hostname
   console.log(options, ParserPlugin.$Vue.prototype)
   // 自动注册组件
-  // componentFiles.keys().forEach((filePath, index) => {
-  //   // const componentName = filePath.replace(/^\.\/(.*)\.\w+$/, '$1')
-  //   const component = componentFiles(filePath).default
-  //   Vue.component(component.name, component)
-  // })
+  componentFiles.keys().forEach((filePath, index) => {
+    // const componentName = filePath.replace(/^\.\/(.*)\.\w+$/, '$1')
+    const component = componentFiles(filePath).default
+    Vue.component(component.name, component)
+  })
 }
 
 export function setAuthToken(token) {
