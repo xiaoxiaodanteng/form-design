@@ -35,6 +35,7 @@ export default {
   beforeCreate() {
 
   },
+  inject: ['mode'],
   computed: {
     // 为了监听自定义脚本值变化
     selfMethodCodeIsChange() {

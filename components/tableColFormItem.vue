@@ -33,10 +33,6 @@ export default {
       type: Number,
       required: true
     },
-    // rowIndex: {
-    //   type: Number,
-    //   required: true
-    // },
     row: {
       type: Object,
       required: true
@@ -88,7 +84,7 @@ export default {
       const config = scheme.__config__
       const columnConfig = column.__config__
       if (Array.isArray(config.regList)) {
-        console.log(columnConfig)
+        // console.log(columnConfig)
         if (columnConfig.required && this.parser.isAddToForm(columnConfig)) {
           const required = { required: columnConfig.required, message: scheme.placeholder }
           if (Array.isArray(config.defaultValue)) {
@@ -100,7 +96,7 @@ export default {
         }
         rule = regList.concat(config.regList).map(item => {
           // eslint-disable-next-line no-eval
-          item.pattern && (item.pattern = eval(item.pattern))
+          item.__pattern__ && (item.pattern = eval(item.__pattern__))
           item.trigger = ruleTrigger && ruleTrigger[config.tag]
           return item
         })
@@ -121,8 +117,7 @@ export default {
       labelWidth
     }
     const rules = this.getTableColumnRules(this.scheme, column)
-
-    if (this.formData[parent.__vModel__] && this.formData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.children[0].__config__.required) {
+    if (this.formData[parent.__vModel__] && this.formData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.required) {
       props.prop = `${parent.__vModel__}.${columnIndex}.${column.__config__.field}`
       props.rules = rules
     }

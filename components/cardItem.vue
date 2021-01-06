@@ -15,6 +15,10 @@ export default {
     index: {
       type: Number,
       required: true
+    },
+    parentList: {
+      type: Array,
+      default: () => ([])
     }
   },
   data() {
@@ -23,7 +27,7 @@ export default {
 
     return data
   },
-  inject: ['formData', 'parser'],
+  inject: ['formData', 'parser', 'mode'],
   created() {
   },
   mounted() {
@@ -34,25 +38,18 @@ export default {
     const scheme = this.scheme
     const config = this.scheme.__config__
     if (!config.show) return null
-    const child = this.parser.renderChildren(h, this.scheme, this.index)
-    return (
-      h('el-col', { attrs: { span: config.span }}, [
-        h('el-card', {
-          class: 'fe-card',
-          attrs: {
-            bodyStyle: scheme['body-style'] ? JSON.parse(scheme['body-style']) : {
-              padding: 0
-            }
-          }
-        }, [
-          h('div', { slot: 'header', style: { textAlign: config.align }}, config.label),
-          h('el-row', {
-          }, [
-            child
-          ])
-        ])
-      ])
-    )
+    const child = this.parser.renderChildren(h, this.scheme.__config__.children)
+    return <el-col span={config.span}>
+      <el-card class='fe-card' body-style={scheme['body-style'] ? JSON.parse(scheme['body-style']) : {
+        padding: 0
+      }}>
+        <div slot='header' style={{ textAlign: config.align }}>{config.label}</div>
+        <el-row>
+          {child}
+        </el-row>
+      </el-card>
+      {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
+    </el-col>
   }
 }
 </script>

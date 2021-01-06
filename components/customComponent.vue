@@ -23,7 +23,7 @@ export default {
 
     return data
   },
-  inject: ['formData', 'parser', 'draggable'],
+  inject: ['formData', 'parser'],
   created: () => {
   },
   mounted() {
@@ -56,16 +56,19 @@ export default {
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     if (config.showLabel === false) labelWidth = '0'
 
+    const listeners = this.parser.buildListeners(this.scheme)
+
     const component = h('render', {
       props: {
         conf: this.scheme
       },
-      on: {
-        input: event => {
-          const value = this.formatterValue(event)
-          this.$set(config, 'defaultValue', value)
-        }
-      },
+      on: listeners,
+      // on: {
+      //   input: event => {
+      //     const value = this.formatterValue(event)
+      //     this.$set(config, 'defaultValue', value)
+      //   }
+      // },
       nativeOn: {
         click: event => {
           event.preventDefault()

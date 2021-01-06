@@ -6,10 +6,7 @@ import componentMixin from '@/components/FormGenerator/parser/mixins/componentMi
 export default {
   name: 'ElementDynamicTable',
   components: { render },
-  mixins: [
-    customScript,
-    componentMixin
-  ],
+  mixins: [customScript, componentMixin],
   props: {
     scheme: {
       type: Object,
@@ -18,57 +15,67 @@ export default {
     index: {
       type: Number,
       required: true
+    },
+    parentList: {
+      type: Array,
+      default: () => ([])
     }
   },
   data() {
     const data = {
-      currentRow: undefined
+      currentRow: undefined,
+      visibleAddFieldDialog: false
     }
 
-    if (this.scheme.__config__.tableSelectType === 'multiple') data[`multipleSelection${this.scheme.__config__.renderKey}`] = []
     return data
   },
-  inject: ['formData', 'parser'],
+  inject: ['formData', 'parser', 'mode'],
   created() {
   },
   mounted() {
   },
   methods: {
-
-    addTableRow() {
-      const row = {}
-      this.scheme.__config__.children.forEach(child => {
-        row[child.__config__.field] = child.__config__.defaultValue
-      })
-      this.scheme.data.push(row)
+    setInputValue(value, field) {
+      this.filedForm[field] = value
     },
-    delRow() {
-      const config = this.scheme.__config__
-      if (config.tableSelectType === 'multiple') {
-        this[`multipleSelection${config.renderKey}`].length > 0 && this.$confirm('是否删除？')
-          .then(() => {
-            this[`multipleSelection${config.renderKey}`].forEach(item => {
-              const delIndex = this.scheme.data.find(v => v.dataKey === item.dataKey)
-              if (delIndex !== -1) {
-                this.scheme.data.splice(delIndex, 1)
-              }
-            })
-          })
-      } else {
-        if (this.currentRow) {
-          const delIndex = this.scheme.data.find(v => v === this.currentRow)
-          if (delIndex !== -1) {
-            this.scheme.data.splice(delIndex, 1)
-          }
-        }
+    handleAddField(event) {
+      event.stopPropagation()
+      this.scheme.__config__.children.push()
+      const formId = this.parser.getNewId()
+      const config = {
+        tag: 'el-table-column',
+        field: `field${formId}`,
+        label: `field${formId}`,
+        defaultValue: '',
+        formId,
+        children: [],
+        show: true,
+        showContent: true, // 是否显示内容
+        showFormItem: true, // 是否显示
+        disabled: false, // 是否禁用
+        required: false // 表单是否必填
       }
+      this.scheme.__config__.children.push({
+        __config__: config,
+        minWidth: 'auto',
+        width: 'auto',
+        showOverflowTooltip: false,
+        headerAlign: 'left',
+        align: 'left',
+        fixed: false,
+        resizable: true
+      })
+      this.scheme.data.forEach(item => {
+        this.$set(item, `field${formId}`, '')
+      })
     }
   },
   render(h) {
     const scheme = this.scheme
     const config = this.scheme.__config__
     const self = this
-    if (!config.show) return null
+    if (this.mode !== 'edit' && !config.show) return null
+
     const indexFnCodeStr = this.scheme['fn_index-method']
     const indexAttr = {}
     if (indexFnCodeStr) {
@@ -82,120 +89,102 @@ export default {
         this.$message.error('序号自定义函数配置错误')
       }
     }
-    // return Vue.compile(`
-    //   <div class="a">234</div>
-    // `).render.call(this)
-    return h('el-col', {
-      attrs: { span: config.span }
-    }, [
-      h('el-row', [
-        h('render', {
-          props: {
-            conf: scheme
-          },
-          on: {
-            selectionChange: (val) => {
-              this[`multipleSelection${config.renderKey}`] = val
-            },
-            currentChange: (val) => {
-              this.currentRow = val
-            }
+
+    return <el-col span={config.span}>
+      <el-row class={this.mode === 'edit' ? 'row' : ''}>
+        {this.mode === 'edit' && <div class='actions mb5'>
+          <el-link type='success' icon='el-icon-plus' onClick={this.handleAddField}>新增列</el-link>
+        </div>}
+
+        <render conf={scheme}
+          oncurrent-change={val => {
+            this.currentRow = val
+          }}
+          onselection-change={(val) => {
+            this[`multipleSelection${config.renderKey}`] = val
+          }}
+          onheader-click={column => {
+            this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
+            event.stopPropagation()
+          }}
+        >
+          { // 多选
+            config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0 && <el-table-column type='selection' align='center' width='55px'></el-table-column>
           }
-        }, [
-          // 多选
-          config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0
-            ? h('el-table-column', {
-              attrs: {
-                type: 'selection',
-                align: 'center',
-                width: '55px'
+
+          { // 显示序号
+            config.showIndex && <el-table-column type='index' align='center' width='50px' label='序号'></el-table-column>
+          }
+
+          {// 列表
+            this.scheme.__config__.children.map((child, index) => {
+              const { __config__: childConfig, ...attrs } = child
+
+              // 编辑模式
+              if (this.mode === 'edit') {
+                return <el-table-column
+                  class-name={childConfig ? 'hidden-item' : ''}
+                  {...attrs}
+                  columnKey={`${index}`}
+                  label={childConfig.label}
+                  prop={childConfig.field}
+                  scopedSlots={{
+                    default: (rowParams) => {
+                      const { row, $index } = rowParams
+                      // console.log(rowParams)
+                      const className = 'drawing-row-item table-row-item'
+                      return <el-row
+                        class={className}
+                        gutter={childConfig.gutter}
+                        tabindex='1'
+                      >
+                        {childConfig.children.length === 0 && <span class='showValue'>
+                          { row[childConfig.field] }
+                        </span>}
+
+                        {this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)}
+                      </el-row>
+                    },
+                    header: ({ column }) => {
+                    // 渲染模式
+                      if (this.mode !== 'edit') {
+                        return childConfig.show && <span>{column.label}</span>
+                      }
+                      return <div class={childConfig.show ? 'drawing-row-item' : 'drawing-row-item is-hide'}>
+                        <span>{column.label}</span>
+                        <div class='draw-actions draw-el-table-header-actions'>
+                          <span class='drawing-item-delete drawing-item-action' title='删除该字段' onClick={event => {
+                            this.scheme.__config__.children.splice(index, 1); event.stopPropagation()
+                          }}>
+                            <i class='el-icon-delete'></i>
+                          </span>
+                        </div>
+                      </div>
+                    }
+                  }}
+                >
+                </el-table-column>
               }
-            }) : null,
-          // 显示序号
 
-          config.showIndex ? h('el-table-column', {
-            attrs: {
-              type: 'index',
-              align: 'center',
-              width: '50px',
-              label: '序号',
-              ...indexAttr
-            }
-          }) : null,
-
-          // 列
-          [...this.scheme.__config__.children.map((child, index) => {
-            const { __config__: childConfig, ...attrs } = child
-            return childConfig.show ? h('el-table-column', {
-              props: {
-                ...attrs,
-                columnKey: `${index}`,
-                label: childConfig.label,
-                prop: childConfig.field
-              },
-              scopedSlots: {
+              return <el-table-column {...attrs} column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
                 default: (rowParams) => {
                   const { row, $index } = rowParams
-                  // 显示内容不显示表单元素
-                  if (childConfig.showContent && !childConfig.showFormItem) return h('span', {}, row[childConfig.field])
-                  // 不显示内容也不显示表单元素
-                  if (!childConfig.showContent && !childConfig.showFormItem) return null
-                  // 显示表单元素不显示内容
-                  if (!childConfig.showContent && childConfig.showFormItem) return childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, rowParams, self.scheme) : h('span', {}, row[childConfig.field])
-
-                  // 默认
-                  return childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, rowParams, self.scheme) : h('span', {}, row[childConfig.field])
+                  // console.log(childConfig, row, row[childConfig.field])
+                  return childConfig.children.length > 0 ? this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)
+                    : <span>
+                      { row[childConfig.field] }
+                    </span>
                 },
-                header: ({ column }) => h('span', {}, column.label)
-              }
-            }, []) : null
-          })]
-        ])
-      ])
-    ])
-    // return (
-    //   <el-col span={config.span}>
-    //     <el-row class='row' >
-    //       <render key={config.renderKey} conf={scheme} on-selection-change={(val) => {
-    //         this[`multipleSelection${config.renderKey}`] = val
-    //       }}
-    //       on-current-change={val => {
-    //         this.currentRow = val
-    //       }}
-    //       >
-    //         {
-    //           // 多选
-    //           config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0 ? <el-table-column
-    //             type='selection'
-    //             align='center'
-    //             width='55'>
-    //           </el-table-column> : null
-    //         },
-    //         { // 显示序号
-    //           config.showIndex ? <el-table-column type='index' align='center' width='50' label='序号'></el-table-column> : null
-    //         }
-    //         {this.scheme.__config__.children.map((child, index) => {
-    //           const { __config__: childConfig, ...attrs } = child
-    //           return childConfig.show ? <el-table-column column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
-    //             default({ row, $index }) {
-    //               // scheme.data.forEach(item => console.log(item, row))
-    //               return (
-    //                 childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : <span>{row[childConfig.field]}</span>
-    //               )
-    //             },
-    //             header({ column }) {
-    //               return <div>
-    //                 <span>{column.label}</span>
-    //               </div>
-    //             }
-    //           }} props={{ ...attrs }}>
-    //           </el-table-column> : null
-    //         })}
-    //       </render>
-    //     </el-row>
-    //   </el-col>
-    // )
+                header: ({ column }) => {
+                // 渲染模式
+                  return childConfig.show && <span>{column.label}</span>
+                }
+              }}>
+              </el-table-column>
+            })}
+        </render>
+      </el-row>
+    </el-col>
   }
 }
 </script>
-

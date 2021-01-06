@@ -161,21 +161,21 @@ export default {
       })
     },
     renderFrom(h) {
-      const { formConfCopy, parserFormData } = this
+      const { formConf, parserFormData } = this
       return (
-        <el-row gutter={formConfCopy.gutter}>
+        <el-row gutter={formConf.gutter}>
           <el-form
-            size={formConfCopy.size}
-            label-position={formConfCopy.labelPosition}
-            disabled={formConfCopy.disabled}
-            label-width={`${formConfCopy.labelWidth}px`}
-            ref={formConfCopy.formRef}
+            size={formConf.size}
+            label-position={formConf.labelPosition}
+            disabled={formConf.disabled}
+            label-width={`${formConf.labelWidth}px`}
+            ref={formConf.formRef}
             // model不能直接赋值 https://github.com/vuejs/jsx/issues/49#issuecomment-472013664
             props={{ model: parserFormData }}
             rules={this.parserFormRules}
           >
-            {this.renderFormItem(h, formConfCopy.fields)}
-            {formConfCopy.formBtns && this.formBtns(h)}
+            {this.renderFormItem(h, formConf.fields)}
+            {formConf.formBtns && this.formBtns(h)}
           </el-form>
         </el-row>
       )
@@ -183,7 +183,7 @@ export default {
 
     formBtns(h) {
       return <el-col>
-        <el-form-item size={this.formConfCopy.size}>
+        <el-form-item size={this.formConf.size}>
           <el-button type='primary' onClick={this.submitForm}>提交</el-button>
           <el-button onClick={this.resetForm}>重置</el-button>
         </el-form-item>
@@ -192,6 +192,28 @@ export default {
 
     layoutIsNotFound() {
       throw new Error(`没有与${this.currentItem.__config__.layout}匹配的layout`)
+    },
+
+    formatterValue(scheme, event) {
+      // 输入框数字类型
+      if (scheme.__config__.numberType) {
+        // 整数类型
+        if (scheme.__config__.numberType === 'Int') {
+          return event.replace('.', '')
+        } else if (scheme.__config__.numberType === 'Decimal') {
+          // 是否需要限制小数点位数
+          const limit = scheme.__config__.decimalPointLength
+          if (scheme.__config__.decimalPointLength) {
+            const numberValues = event.split('.')
+            if (numberValues[1] && numberValues[1].length > limit) {
+              numberValues[1] = numberValues[1].slice(0, limit)
+            }
+            return numberValues.join('.')
+          }
+        }
+      }
+
+      return event
     },
 
     setValue(event, config, scheme) {
@@ -203,6 +225,7 @@ export default {
           value = +value
         }
       }
+      value = this.formatterValue(scheme, value)
       this.$set(config, 'defaultValue', value)
       if (this.parserFormData && this.isAddToForm(scheme.__config__)) {
         this.$set(this.parserFormData, scheme.__vModel__, value)

@@ -56,14 +56,14 @@ export default {
     },
     // 执行钩子
     runHook(type, newForm, oldForm) {
-      const code = this.iGetInnerText(this.formConfCopy[`__${type}__`])
+      const code = this.iGetInnerText(this.formConf[`__${type}__`])
       if (!code) return
       const fnStr = this.getHookStr(code)
 
       // console.log(`----执行${type}钩子---`)
       // console.log(fnStr)
       // console.log(`----执行${type}钩子结束---`)
-      this.hookHandler(fnStr, this.formConfCopy, this.value, oldForm, this.componentModel, this.$props)
+      this.hookHandler(fnStr, this.formConf, this.value, oldForm, this.componentModel, this.$props)
     },
     getHookStr(code) {
       const ast = parse(code)

@@ -64,7 +64,9 @@ export default {
 
       componentModel: {}, // 存放不添加到formData的组件数据
 
-      componentMaps: {} // 组件key:component
+      componentMaps: {}, // 组件key:component
+
+      multipleData: {} // 用于表格多选
     }
     data.parserFormData = this.value
     data.parserFormRules = data[FORM_MODEL]
@@ -428,32 +430,6 @@ export default {
     setForm() {
       if (Object.keys(this.config).length === 0) return
       this.formConfCopy = { ...this.formConfCopy, ...this.config }
-    },
-
-    // 处理自定义禁用组件
-    disposeCustomDisabledComponent() {
-      this.customDisabledComponentList.forEach(component => {
-        // 并且 操作
-        const customOptions = component.__customDisabled__.options
-        const type = component.__customDisabled__.type
-        const results = customOptions.reduce((prev, curr) => {
-          let result = true
-          if (curr.operation === 'includes') {
-            for (let i = 0; i < curr.value.length; i++) {
-              const val = curr.value[i]
-              if (!this.value[curr.field].includes(val)) {
-                result = false
-                break
-              }
-            }
-          } else {
-            // eslint-disable-next-line no-eval
-            result = eval(`${this.value[curr.field]}${curr.operation}${curr.value}`)
-          }
-          return [...prev, result]
-        }, [])
-        component.disabled = type === 'and' ? !results.includes(false) : results.includes(true)
-      })
     },
 
     // 处理数据

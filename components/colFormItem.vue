@@ -20,13 +20,42 @@ export default {
   name: 'ColFormItem',
   components: { render },
   mixins: [customScript, componentMixin],
+  inheritAttrs: false,
   props: {
     scheme: {
       type: Object,
       required: true
+    },
+    index: {
+      type: Number,
+      default: 0
+    },
+    parentList: {
+      type: Array,
+      default: () => ([])
+    },
+    column: {
+      type: Object,
+      required: false,
+      default: () => ({})
+    },
+    columnIndex: {
+      type: Number,
+      required: false,
+      default: -1
+    },
+    row: {
+      type: Object,
+      required: false,
+      default: () => ({})
+    },
+    parent: {
+      type: Object,
+      required: false,
+      default: () => ({})
     }
   },
-  inject: ['formData', 'parser'],
+  inject: ['formData', 'parser', 'mode'],
   computed: {
     config() {
       return this.scheme.__config__
@@ -74,7 +103,7 @@ export default {
         }
         rule = regList.concat(config.regList).map(item => {
           // eslint-disable-next-line no-eval
-          item.pattern && (item.pattern = eval(item.pattern))
+          item.__pattern__ && (item.pattern = eval(item.__pattern__))
           item.trigger = ruleTrigger && ruleTrigger[config.tag]
           return item
         })
@@ -83,8 +112,15 @@ export default {
     }
   },
   render(h) {
+    // 编辑模式下 不隐藏元素
     const config = this.scheme.__config__
-    if (!config.show) return null
+    let className = ''
+
+    if (this.mode === 'edit') {
+      className = !config.show && 'hidden-item'
+    } else {
+      if (!config.show) return null
+    }
     const listeners = this.parser.buildListeners(this.scheme)
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     // 表单元素
@@ -96,25 +132,37 @@ export default {
     if (config.showLabel === false) labelWidth = '0'
 
     const rules = this.getRules()
-    return h('el-col', {
-      attrs: {
-        span: config.span
-      }
-    }, [h('el-form-item', {
-      attrs: {
-        labelWidth,
-        prop: this.scheme.__vModel__,
-        label: config.showLabel ? config.label : '',
-        rules
-      }
-    }, [
-      h('render', {
-        props: {
-          conf: this.scheme
-        },
-        on: listeners
-      })
-    ])])
+
+    return <el-col span={config.span} class={className}>
+      <el-form-item
+        label-width={labelWidth}
+        prop={this.scheme.__vModel__}
+        data-prop={this.scheme.__vModel__}
+        label={config.showLabel ? config.label : ''}
+        rules={rules}>
+        <render conf={this.scheme} {...{ on: listeners }} />
+      </el-form-item>
+      {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
+    </el-col>
+    // return h('el-col', {
+    //   attrs: {
+    //     span: config.span
+    //   }
+    // }, [h('el-form-item', {
+    //   attrs: {
+    //     labelWidth,
+    //     prop: this.scheme.__vModel__,
+    //     label: config.showLabel ? config.label : '',
+    //     rules
+    //   }
+    // }, [
+    //   h('render', {
+    //     props: {
+    //       conf: this.scheme
+    //     },
+    //     on: listeners
+    //   })
+    // ])])
   }
   // render(h) {
   //   const config = this.scheme.__config__
