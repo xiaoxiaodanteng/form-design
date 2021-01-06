@@ -1,6 +1,4 @@
 
-<script>
-
 import render from '@/components/FormGenerator/render/render.js'
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
@@ -134,40 +132,40 @@ export default {
 
     const rules = this.getRules()
 
-    // return <el-col span={config.span} class={className}>
-    //   <el-form-item
-    //     label-width={labelWidth}
-    //     prop={this.scheme.__vModel__}
-    //     data-prop={this.scheme.__vModel__}
-    //     label={config.showLabel ? config.label : ''}
-    //     rules={rules}>
-    //     <render conf={this.scheme} {...{ on: listeners }} />
-    //   </el-form-item>
-    //   {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
-    // </el-col>
-    return h('el-col', {
-      attrs: {
-        span: config.span
-      }
-    }, [
-      h('el-form-item', {
-        attrs: {
-          labelWidth,
-          prop: this.scheme.__vModel__,
-          label: config.showLabel ? config.label : '',
-          rules
-        }
-      }, [
-        h('render', {
-          props: {
-            conf: this.scheme
-          },
-          on: listeners
-        })
-      ]),
-      this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
-    ]
-    )
+    return <el-col span={config.span} class={className}>
+      <el-form-item
+        label-width={labelWidth}
+        prop={this.scheme.__vModel__}
+        data-prop={this.scheme.__vModel__}
+        label={config.showLabel ? config.label : ''}
+        rules={rules}>
+        <render conf={this.scheme} {...{ on: listeners }} />
+      </el-form-item>
+      {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
+    </el-col>
+    // return h('el-col', {
+    //   attrs: {
+    //     span: config.span
+    //   }
+    // }, [
+    //   h('el-form-item', {
+    //     attrs: {
+    //       labelWidth,
+    //       prop: this.scheme.__vModel__,
+    //       label: config.showLabel ? config.label : '',
+    //       rules
+    //     }
+    //   }, [
+    //     h('render', {
+    //       props: {
+    //         conf: this.scheme
+    //       },
+    //       on: listeners
+    //     })
+    //   ]),
+    //   this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
+    // ]
+    // )
   }
   // render(h) {
   //   const config = this.scheme.__config__
@@ -184,4 +182,3 @@ export default {
   //   )
   // }
 }
-</script>
