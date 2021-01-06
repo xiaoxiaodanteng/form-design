@@ -134,36 +134,36 @@ export default {
 
     const rules = this.getRules()
 
-    return <el-col span={config.span} class={className}>
-      <el-form-item
-        label-width={labelWidth}
-        prop={this.scheme.__vModel__}
-        data-prop={this.scheme.__vModel__}
-        label={config.showLabel ? config.label : ''}
-        rules={rules}>
-        <render conf={this.scheme} {...{ on: listeners }} />
-      </el-form-item>
-      {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
-    </el-col>
-    // return h('el-col', {
-    //   attrs: {
-    //     span: config.span
-    //   }
-    // }, [h('el-form-item', {
-    //   attrs: {
-    //     labelWidth,
-    //     prop: this.scheme.__vModel__,
-    //     label: config.showLabel ? config.label : '',
-    //     rules
-    //   }
-    // }, [
-    //   h('render', {
-    //     props: {
-    //       conf: this.scheme
-    //     },
-    //     on: listeners
-    //   })
-    // ])])
+    // return <el-col span={config.span} class={className}>
+    //   <el-form-item
+    //     label-width={labelWidth}
+    //     prop={this.scheme.__vModel__}
+    //     data-prop={this.scheme.__vModel__}
+    //     label={config.showLabel ? config.label : ''}
+    //     rules={rules}>
+    //     <render conf={this.scheme} {...{ on: listeners }} />
+    //   </el-form-item>
+    //   {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
+    // </el-col>
+    return h('el-col', {
+      attrs: {
+        span: config.span
+      }
+    }, [h('el-form-item', {
+      attrs: {
+        labelWidth,
+        prop: this.scheme.__vModel__,
+        label: config.showLabel ? config.label : '',
+        rules
+      }
+    }, [
+      h('render', {
+        props: {
+          conf: this.scheme
+        },
+        on: listeners
+      })
+    ])])
   }
   // render(h) {
   //   const config = this.scheme.__config__
