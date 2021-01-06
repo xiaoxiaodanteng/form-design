@@ -149,21 +149,25 @@ export default {
       attrs: {
         span: config.span
       }
-    }, [h('el-form-item', {
-      attrs: {
-        labelWidth,
-        prop: this.scheme.__vModel__,
-        label: config.showLabel ? config.label : '',
-        rules
-      }
     }, [
-      h('render', {
-        props: {
-          conf: this.scheme
-        },
-        on: listeners
-      })
-    ])])
+      h('el-form-item', {
+        attrs: {
+          labelWidth,
+          prop: this.scheme.__vModel__,
+          label: config.showLabel ? config.label : '',
+          rules
+        }
+      }, [
+        h('render', {
+          props: {
+            conf: this.scheme
+          },
+          on: listeners
+        })
+      ]),
+      this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
+    ]
+    )
   }
   // render(h) {
   //   const config = this.scheme.__config__
