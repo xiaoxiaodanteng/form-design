@@ -111,7 +111,8 @@ export default {
       return rule
     }
   },
-  render(h) {
+  render(h, context) {
+    console.log(context, this)
     // 编辑模式下 不隐藏元素
     const config = this.scheme.__config__
     let className = ''
