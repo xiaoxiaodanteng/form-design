@@ -178,13 +178,13 @@ export default {
                         gutter={childConfig.gutter}
                         tabindex='1'
                         nativeOnClick={event => {
-                          this.$refs[id].handleFocus()
+                          this.$refs[id] && this.$refs[id].handleFocus()
                         }}
                         nativeOnKeyup={event => {
                         // esc
                           if (event.keyCode === 27) {
                             event.preventDefault()
-                            this.$refs[id].handleBlur()
+                            this.$refs[id] && this.$refs[id].handleBlur()
                           }
                         }}
                         nativeOnKeydown={event => {

@@ -55,6 +55,10 @@ export default {
       componentModel: {}, // 不加入表单数据的组件数据
       componentMaps: {} // 组件key:component
     }
+
+    if (!this.formConf.fields) {
+      this.formConf.fields = []
+    }
     // 初始化数据
     data.parserFormData = this.handleUpdateModel(data)
     // 设置代理
@@ -69,6 +73,11 @@ export default {
       handler() {
         // 设置表单全局属性
         this.setForm()
+
+        // 初始化数据
+        // this.parserFormData = this.handleUpdateModel(this)
+        // 设置代理
+        // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
         this.initFormData(this.formConf.fields, this.parserFormData, this)

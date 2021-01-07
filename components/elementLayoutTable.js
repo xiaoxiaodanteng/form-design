@@ -155,14 +155,14 @@ export default {
                   return h('el-row', { class: className, attrs: { tabindex: '1' }, nativeOn: {
                     click: event => {
                       event.stopPropagation()
-                      this.$refs[id].handleFocus()
+                      this.$refs[id] && this.$refs[id].handleFocus()
                       this.parser.activeItem(row[childConfig.field])
                     },
                     keyup: event => {
                       // esc
                       if (event.keyCode === 27) {
                         event.preventDefault()
-                        this.$refs[id].handleBlur()
+                        this.$refs[id] && this.$refs[id].handleBlur()
                       }
                     },
                     keydown: event => {
