@@ -119,13 +119,13 @@ export default {
         ]),
 
         h('render', { props: { conf: scheme }, on: {
-          oncurrentChange: val => {
+          'current-change': val => {
             this.currentRow = val
           },
-          onselectionChange: (val) => {
+          selectionChange: (val) => {
             this[`multipleSelection${config.renderKey}`] = val
           },
-          onheaderClick: column => {
+          headerClick: column => {
             this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
           }
         }}, [
@@ -162,7 +162,7 @@ export default {
                       // esc
                       if (event.keyCode === 27) {
                         event.preventDefault()
-                        this.$refs[id] && this.$refs[id].handleBlur()
+                        childConfig.children.length === 0 && this.$refs[id] && this.$refs[id].handleBlur()
                       }
                     },
                     keydown: event => {

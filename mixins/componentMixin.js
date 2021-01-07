@@ -5,7 +5,6 @@ export default {
   components: { render },
   methods: {
     $post(url, data = {}, config) {
-      console.log(data)
       let fetchUrl = url
       if (!/http|https/.test(fetchUrl)) {
         fetchUrl = `${this.$hostname}${url}`
@@ -36,6 +35,18 @@ export default {
         },
         ...config
       })
+    }
+  },
+  created() {
+    if (!this.scheme) return
+    const { __config__: config } = this.scheme
+    // 发送请求
+    if (config.dataType === 'dynamic') {
+      if (config.autoFetch) {
+        // 如果是动态表格 则不需要请求
+        if (this.parser.parserFormData[this.scheme.__vModel__] && this.scheme.__config__.tag === 'el-table') return
+        this.parser.fetchData(this.scheme)
+      }
     }
   }
 }

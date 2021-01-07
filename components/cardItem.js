@@ -39,7 +39,7 @@ export default {
     return h('el-col', { attrs: { span: config.span }}, [
       h('el-card', { attrs: { bodyStyle: scheme['body-style'] ? JSON.parse(scheme['body-style']) : { padding: 0 }}}, [
         h('div', { style: { textAlign: config.align }, slot: 'header' }, config.label),
-        h('el-row', child)
+        h('el-row', [child])
       ]),
 
       this.parser.itemBtns(h, this.scheme, this.index, this.parentList)

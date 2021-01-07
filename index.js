@@ -5,7 +5,7 @@ const componentFiles = require.context('./components', true, /\.(js|vue)$/)
 import Tinymce from './tinymce/index.vue'
 
 export { emit }
-// import '@/styles/formGenerator/index.scss'
+import '@/styles/formGenerator/index.scss'
 const ParserPlugin = {
   $Vue: {}
 }

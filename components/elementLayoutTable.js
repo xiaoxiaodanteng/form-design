@@ -130,8 +130,13 @@ export default {
         ]),
 
         h('render', { props: { conf: scheme }, on: {
-          onheaderClick: column => {
+          headerClick: column => {
             this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
+          },
+          'current-change': val => {
+            console.log(val)
+
+            this.currentRow = val
           }
         }}, [
 
@@ -155,8 +160,8 @@ export default {
                   return h('el-row', { class: className, attrs: { tabindex: '1' }, nativeOn: {
                     click: event => {
                       event.stopPropagation()
-                      this.$refs[id] && this.$refs[id].handleFocus()
                       this.parser.activeItem(row[childConfig.field])
+                      row[childConfig.field].__config__.children.length === 0 && this.$refs[id] && this.$refs[id].handleFocus()
                     },
                     keyup: event => {
                       // esc
@@ -209,7 +214,7 @@ export default {
           }),
 
           // 操作
-          config.showAction && h('el-table-column', { attrs: { align: 'center', label: '操作', width: '60px' }, scopedSlots: {
+          this.mode === 'edit' && h('el-table-column', { attrs: { align: 'center', label: '操作', width: '60px' }, scopedSlots: {
             default: ({ row, $index }) => {
               return h('div', [
                 h('el-link', { attrs: { icon: 'el-icon-circle-plus-outline', type: 'primary' }, style: { fontSize: '18px' }, on: { click: event => this.addTableRow(event, $index) }}),

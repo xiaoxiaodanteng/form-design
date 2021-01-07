@@ -80,7 +80,8 @@ export default {
         // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
-        this.initFormData(this.formConf.fields, this.parserFormData, this)
+        // console.log({ ...this.parserFormData }, { ...this.value }, '----fields')
+        // this.initFormData(this.formConf.fields, this.parserFormData, this)
       }
     },
     value: {
@@ -89,11 +90,10 @@ export default {
         if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
           if (Object.keys(this.value).length > 0) {
             for (const [key, value] of Object.entries(this.value)) {
-              if (this.parserFormData.hasOwnProperty(key)) {
-                this.parserFormData[key] = value
-              }
+              this.$set(this.parserFormData, key, value)
             }
-            this.$emit('input', this.parserFormData)
+            // this.$emit('input', this.parserFormData)
+            // this.parserFormData = this.handleUpdateModel(this)
           }
         }
         this.runHook('watch', newVal, oldVal)
@@ -119,7 +119,7 @@ export default {
       // 设置表单全局属性
       this.setForm()
       // 请求异步数据
-      this.getDynamicData(this.formConf.fields)
+      // this.getDynamicData(this.formConf.fields)
     },
 
     // 初始化执行
@@ -198,6 +198,7 @@ export default {
     },
     // 设置代理
     handleUpdateModel(vm) {
+      console.log({ ...this.value })
       const proxyFormData = new Proxy(this.value, {
         get: (target, propKey, receiver) => {
           switch (propKey) {
@@ -436,7 +437,8 @@ export default {
           components
         )
       }
-      return <draggable class={isRoot ? 'drawing-board' : 'drag-wrapper'} list={children} animation={340} group='componentsGroup'>
+      return <draggable class={isRoot ? 'drawing-board' : 'drag-wrapper'} list={children}
+        group='componentsGroup'>
         {
           components
         }
@@ -482,7 +484,7 @@ export default {
   render(h) {
     const { fields } = this.formConf
     // 渲染表单
-    return (<el-row gutter={this.formConf.gutter}>
+    return (<el-row gutter={this.formConf.gutter} class='parser'>
       <el-form
         size={this.formConf.size}
         label-position={this.formConf.labelPosition}
