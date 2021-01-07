@@ -1,5 +1,5 @@
 <template>
-  <div ref="tableInput" :style="{zIndex: actived ? 9 : 8}" class="table-input" :class="{required: required&&value.length > 0}" contenteditable="true" @input="onInput" />
+  <div ref="tableInput" :style="{zIndex: actived ? 9 : 8}" class="table-input" contenteditable="true" @input="onInput" />
 </template>
 
 <script>
@@ -9,10 +9,6 @@ export default {
     value: {
       type: String,
       default: ''
-    },
-    required: {
-      type: Boolean,
-      default: false
     }
   },
   data() {
@@ -59,16 +55,7 @@ export default {
   transform: translateY(-50%);
   min-height: 40px;
   line-height: 40px;
-  padding-left: 8px;
-  &.required {
-    &::after {
-      content: '*';
-      position: absolute;
-      left: 1px;
-      top: 1px;
-      color: #ff4949;
-    }
-  }
+  padding-left: 5px;
 }
 </style>
 

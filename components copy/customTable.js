@@ -1,5 +1,6 @@
 import customScript from '../mixins/customScript'
 import componentMixin from '../mixins/componentMixin'
+import axios from 'axios'
 
 export default {
   name: 'CustomTable',
@@ -30,7 +31,39 @@ export default {
   mounted() {
   },
   methods: {
-
+    $post(url, data = {}, config) {
+      console.log(data)
+      let fetchUrl = url
+      if (!/http|https/.test(fetchUrl)) {
+        fetchUrl = `${this.$hostname}${url}`
+      }
+      return axios({
+        url: fetchUrl,
+        method: 'POST',
+        data,
+        headers: {
+          'ERP-Auth-Token': this.authToken || '',
+          'Access-Control-Expose-Headers': 'Authorization'
+        },
+        ...config
+      })
+    },
+    $get(url, params = {}, config) {
+      let fetchUrl = url
+      if (!/http|https/.test(fetchUrl)) {
+        fetchUrl = `${this.$hostname}${url}`
+      }
+      return axios({
+        url: fetchUrl,
+        method: 'GET',
+        params,
+        headers: {
+          'ERP-Auth-Token': this.authToken || '',
+          'Access-Control-Expose-Headers': 'Authorization'
+        },
+        ...config
+      })
+    }
   },
   render(h, context) {
     const { __config__: config } = this.scheme

@@ -12,10 +12,6 @@ export default {
     index: {
       type: Number,
       required: true
-    },
-    parentList: {
-      type: Array,
-      default: () => ([])
     }
   },
   data() {
@@ -61,10 +57,7 @@ export default {
 
     const component = h('render', {
       props: {
-        conf: {
-          href: this.mode === 'edit' ? '' : this.scheme, // 处理编辑模式下 el-link不跳转
-          ...this.scheme
-        }
+        conf: this.scheme
       },
       on: listeners,
       // on: {
@@ -79,10 +72,7 @@ export default {
           this.parser.activeItem(this.scheme)
         }
       }
-    }, [
-      config.defaultValue,
-      this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
-    ])
+    })
     // 判断是否需要form-item
     const formItemComponent = config.isFormItem ? h('el-form-item', {
       attrs: {

@@ -1,19 +1,13 @@
 import graphqlRequest from './graphqlRequest'
 import parserCustomScript from './mixins/parserCustomScript'
-
+import componentMixin from './mixins/componentMixin'
 import parserEditorMixin from './mixins/parserEditorMixin'
 import fetchMixin from './mixins/fetchMixin'
-// const componentFiles = require.context('./components', true, /\.js$/)
-// const components = {}
-// componentFiles.keys().forEach((filePath, index) => {
-//   // const componentName = filePath.replace(/^\.\/(.*)\.\w+$/, '$1')
-//   const component = componentFiles(filePath).default
-//   components[component.name] = component
-// })
+
 import { createHash } from './utils/'
 export default {
   name: 'Parser',
-  mixins: [parserCustomScript, parserEditorMixin, fetchMixin],
+  mixins: [parserCustomScript, parserEditorMixin, fetchMixin, componentMixin],
   inheritAttrs: false,
   props: {
     mode: {
@@ -42,6 +36,10 @@ export default {
       default: () => ({})
     },
     value: {
+      type: Object,
+      default: () => ({})
+    },
+    globalVar: {
       type: Object,
       default: () => ({})
     }
@@ -325,7 +323,11 @@ export default {
       componentList.forEach(component => {
         const config = component.__config__
         if (config.dataType === 'dynamic') {
-          if (config.autoFetch) this.fetchData(component)
+          if (config.autoFetch) {
+            // 如果是动态表格 则不需要请求
+            if (this.value[component.__vModel__] && component.__config__.tag === 'el-table') return
+            this.fetchData(component)
+          }
         }
         if (config.tag === 'el-table' && config.tableType === 'layout') {
           component.data.forEach(item => {
@@ -412,7 +414,6 @@ export default {
           nativeOn.click = event => {
             event.stopPropagation()
             this.activeItem(scheme)
-            console.log(this.activeId, config.formId)
           }
         }
         return h(scheme.__config__.layout, {

@@ -36,13 +36,16 @@ export default {
     const config = this.scheme.__config__
     if (!config.show) return null
     const child = this.parser.renderChildren(h, this.scheme.__config__.children)
-    return h('el-col', { attrs: { span: config.span }}, [
-      h('el-card', { attrs: { bodyStyle: scheme['body-style'] ? JSON.parse(scheme['body-style']) : { padding: 0 }}}, [
-        h('div', { style: { textAlign: config.align }, slot: 'header' }, config.label),
-        h('el-row', child)
-      ]),
-
-      this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
-    ])
+    return <el-col span={config.span}>
+      <el-card class='fe-card' body-style={scheme['body-style'] ? JSON.parse(scheme['body-style']) : {
+        padding: 0
+      }}>
+        <div slot='header' style={{ textAlign: config.align }}>{config.label}</div>
+        <el-row>
+          {child}
+        </el-row>
+      </el-card>
+      {this.parser.itemBtns(h, this.scheme, this.index, this.parentList)}
+    </el-col>
   }
 }

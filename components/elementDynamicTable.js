@@ -87,100 +87,66 @@ export default {
       }
     }
 
-    return <el-col span={config.span}>
-      <el-row class={this.mode === 'edit' ? 'row' : ''}>
-        {this.mode === 'edit' && <div class='actions mb5'>
-          <el-link type='success' icon='el-icon-plus' onClick={this.handleAddField}>新增列</el-link>
-        </div>}
+    return h('el-col', { attrs: { span: config.span }}, [
+      h('el-row', { class: this.mode === 'edit' ? 'row' : '' }, [
+        this.mode === 'edit' && h('div', { class: 'actions mb5' }, h('el-link', { attrs: { type: 'success', icon: 'el-icon-plus' }, on: { click: this.handleAddField }}, '新增列'))
+      ]),
 
-        <render conf={scheme}
-          oncurrent-change={val => {
-            this.currentRow = val
-          }}
-          onselection-change={(val) => {
-            this[`multipleSelection${config.renderKey}`] = val
-          }}
-          onheader-click={column => {
-            this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
-            event.stopPropagation()
-          }}
-        >
-          { // 多选
-            config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0 && <el-table-column type='selection' align='center' width='55px'></el-table-column>
-          }
+      h('render', { props: { conf: scheme }, on: {
+        oncurrentChange: val => {
+          this.currentRow = val
+        },
+        onselectionChange: (val) => {
+          this[`multipleSelection${config.renderKey}`] = val
+        },
+        onheaderClick: column => {
+          this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
+        }
+      }}, [
+        // 多选
+        config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0 && h('el-table-column', { attrs: { type: 'selection', align: 'center', width: '55px' }}),
+        // 显示序号
+        config.showIndex && h('el-table-column', { attrs: { type: 'index', align: 'center', width: '50px', label: '序号' }}),
+        // 列表
+        this.scheme.__config__.children.map((child, index) => {
+          const { __config__: childConfig, ...attrs } = child
+          if (this.mode === 'edit') {
+            return h('el-table,column', { attrs: { ...attrs, className: !childConfig.show ? 'hidden-item' : '', columnKey: `${index}`, label: childConfig.label, prop: childConfig.field }, scopedSlots: {
+              default: (rowParams) => {
+                const { row, $index } = rowParams
+                // console.log(rowParams)
+                const className = 'drawing-row-item table-row-item'
 
-          { // 显示序号
-            config.showIndex && <el-table-column type='index' align='center' width='50px' label='序号'></el-table-column>
-          }
-
-          {// 列表
-            this.scheme.__config__.children.map((child, index) => {
-              const { __config__: childConfig, ...attrs } = child
-
-              // 编辑模式
-              if (this.mode === 'edit') {
-                return <el-table-column
-                  class-name={childConfig ? 'hidden-item' : ''}
-                  {...attrs}
-                  columnKey={`${index}`}
-                  label={childConfig.label}
-                  prop={childConfig.field}
-                  scopedSlots={{
-                    default: (rowParams) => {
-                      const { row, $index } = rowParams
-                      // console.log(rowParams)
-                      const className = 'drawing-row-item table-row-item'
-                      return <el-row
-                        class={className}
-                        gutter={childConfig.gutter}
-                        tabindex='1'
-                      >
-                        {childConfig.children.length === 0 && <span class='showValue'>
-                          { row[childConfig.field] }
-                        </span>}
-
-                        {this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)}
-                      </el-row>
-                    },
-                    header: ({ column }) => {
-                    // 渲染模式
-                      if (this.mode !== 'edit') {
-                        return childConfig.show && <span>{column.label}</span>
-                      }
-                      return <div class={childConfig.show ? 'drawing-row-item' : 'drawing-row-item is-hide'}>
-                        <span>{column.label}</span>
-                        <div class='draw-actions draw-el-table-header-actions'>
-                          <span class='drawing-item-delete drawing-item-action' title='删除该字段' onClick={event => {
-                            this.scheme.__config__.children.splice(index, 1); event.stopPropagation()
-                          }}>
-                            <i class='el-icon-delete'></i>
-                          </span>
-                        </div>
-                      </div>
-                    }
-                  }}
-                >
-                </el-table-column>
-              }
-
-              return <el-table-column {...attrs} column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
-                default: (rowParams) => {
-                  const { row, $index } = rowParams
-                  // console.log(childConfig, row, row[childConfig.field])
-                  return childConfig.children.length > 0 ? this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)
-                    : <span>
-                      { row[childConfig.field] }
-                    </span>
-                },
-                header: ({ column }) => {
-                // 渲染模式
-                  return childConfig.show && <span>{column.label}</span>
+                if (this.mode === 'edit') {
+                  return h('el-row', { class: className, attrs: { tabindex: '1' }}, [
+                    childConfig.children.length === 0 && h('span', { class: 'showValue' }, row[childConfig.field]),
+                    this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)
+                  ])
                 }
-              }}>
-              </el-table-column>
-            })}
-        </render>
-      </el-row>
-    </el-col>
+                return childConfig.children.length > 0 ? this.parser.renderTableChildren(h, childConfig.children, child, $index, row, rowParams, self.scheme)
+                  : h('span', row[childConfig.field])
+              },
+              header: ({ column }) => {
+                // 渲染模式
+                if (this.mode !== 'edit') {
+                  return childConfig.show && h('span', column.label)
+                }
+                return h('div', { class: childConfig.show ? 'drawing-row-item' : 'drawing-row-item is-hide' }, [
+                  h('span', column.label),
+                  h('div', { class: 'draw-actions draw-el-table-header-actions' }, [
+                    h('span', { class: 'drawing-item-delete drawing-item-action', attrs: { title: '删除该字段' }, on: { click: event => {
+                      event.stopPropagation()
+                      this.scheme.__config__.children.splice(index, 1)
+                    } }}, [h('i', { class: 'el-icon-delete' })])
+                  ])
+                ])
+              }
+            }})
+          }
+        })
+      ]),
+
+      this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
+    ])
   }
 }
