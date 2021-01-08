@@ -71,6 +71,8 @@ export default {
     fields: {
       deep: true,
       handler(newVal, oldVal) {
+        console.log({ ...this.componentMaps }, '1111111') /
+
         // 设置表单全局属性
         this.setForm()
 

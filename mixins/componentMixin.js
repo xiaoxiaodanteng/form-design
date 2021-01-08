@@ -44,7 +44,9 @@ export default {
     if (config.dataType === 'dynamic') {
       if (config.autoFetch) {
         // 如果是动态表格 则不需要请求
-        if (this.parser.parserFormData[this.scheme.__vModel__] && this.scheme.__config__.tag === 'el-table') return
+        // console.log(this.parser.parserFormData[this.scheme.__vModel__])
+        const formValue = this.parser.parserFormData[this.scheme.__vModel__]
+        if (this.scheme.__config__.tag === 'el-table' && Array.isArray(formValue) && formValue.length > 0) return
         this.parser.fetchData(this.scheme)
       }
     }

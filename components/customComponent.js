@@ -62,8 +62,8 @@ export default {
     const component = h('render', {
       props: {
         conf: {
-          href: this.mode === 'edit' ? '' : this.scheme, // 处理编辑模式下 el-link不跳转
-          ...this.scheme
+          ...this.scheme,
+          href: this.mode === 'edit' ? '' : this.scheme.href // 处理编辑模式下 el-link不跳转
         }
       },
       on: listeners,

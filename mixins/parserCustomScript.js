@@ -29,15 +29,26 @@ export default {
   },
   computed: {
     $props() {
-      return this.globalVar || this.$attrs['global-var']
+      return this.globalVar
     }
   },
   watch: {
-    $props: {
+    // $props: {
+    //   deep: true,
+    //   immediate: true,
+    //   handler() {
+    //     console.log(this.globalVar, '22222')
+    //     this.runHook('props')
+    //   }
+    // }
+    globalVar: {
       deep: true,
       immediate: true,
-      handler() {
-        this.runHook('props')
+      handler(newVal, oldVal) {
+        if (newVal !== oldVal) {
+          // console.log(this.globalVar, '22222')
+          this.runHook('props')
+        }
       }
     }
   },

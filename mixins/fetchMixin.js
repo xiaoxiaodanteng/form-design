@@ -24,7 +24,9 @@ export default {
         if (propParams) {
           propParams.forEach(item => {
             if (item && item.fieldPath.includes('.')) {
-              const fieldValue = item.fieldPath.split('.').reduce((pre, cur) => pre[cur], this.globalVar)
+              const fieldValue = item.fieldPath.split('.').reduce((pre, cur) => {
+                return pre[cur] || ''
+              }, this.globalVar)
               params[item.field] = fieldValue
             } else {
               !!item && (params[item.field] = this.globalVar[item.fieldPath])
