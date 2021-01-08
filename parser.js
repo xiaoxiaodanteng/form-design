@@ -80,8 +80,8 @@ export default {
         // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
-        // console.log({ ...this.parserFormData }, { ...this.value }, '----fields')
-        // this.initFormData(this.formConf.fields, this.parserFormData, this)
+        console.log({ ...this.parserFormData }, { ...this.value }, '----fields')
+        this.initFormData(this.formConf.fields, this.parserFormData, this)
       }
     },
     value: {

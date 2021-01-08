@@ -134,8 +134,6 @@ export default {
             this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
           },
           'current-change': val => {
-            console.log(val)
-
             this.currentRow = val
           }
         }}, [
