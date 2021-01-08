@@ -6,6 +6,7 @@
     :form-conf="formConf"
     :config="config"
     @submit="onSubmit"
+    @active-item="onActiveItem"
   />
 </template>
 
@@ -46,6 +47,9 @@ export default {
   methods: {
     onSubmit(data) {
       this.$emit('submit', data)
+    },
+    onActiveItem(item) {
+      this.$emit('active-item', item)
     }
   }
 }

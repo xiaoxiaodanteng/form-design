@@ -37,7 +37,6 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        console.log(this.globalVar, '22222')
         this.runHook('props')
       }
     }

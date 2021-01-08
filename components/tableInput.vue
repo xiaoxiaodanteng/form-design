@@ -61,13 +61,12 @@ export default {
   line-height: 40px;
   padding-left: 8px;
   &.required {
-    &::after {
-      content: '*';
-      position: absolute;
-      left: 1px;
-      top: 1px;
-      color: #ff4949;
-    }
+    // &::after {
+    //   content: '*';
+    //   position: absolute;
+    //   left: 0px;
+    //   color: #ff4949;
+    // }
   }
 }
 </style>

@@ -186,6 +186,11 @@ export default {
                   }}, [
                     row[childConfig.field].__config__.children.length === 0 && h('TableInput', { ref: id, props: { required: row[childConfig.field].__config__.required, value: row[childConfig.field].__config__.defaultValue }, on: { input: event => { row[childConfig.field].__config__.defaultValue = event } }}),
 
+                    // row[childConfig.field].__config__.children.length === 0 && h('span', { class: {
+                    //   'showValue': true,
+                    //   required: row[childConfig.field].__config__.required && row[childConfig.field].__config__.defaultValue
+                    // }}, row[childConfig.field].__config__.defaultValue),
+
                     this.parser.renderChildren(h, row[childConfig.field].__config__.children)
                   ])
                 }
