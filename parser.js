@@ -70,7 +70,7 @@ export default {
   watch: {
     fields: {
       deep: true,
-      handler() {
+      handler(newVal, oldVal) {
         // 设置表单全局属性
         this.setForm()
 
@@ -80,8 +80,11 @@ export default {
         // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
-        console.log({ ...this.parserFormData }, { ...this.value }, '----fields')
-        this.initFormData(this.formConf.fields, this.parserFormData, this)
+        if (newVal !== oldVal) {
+          // console.log({ ...this.parserFormData }, { ...this.value }, '----fields', newVal === oldVal)
+
+          this.initFormData(this.formConf.fields, this.parserFormData, this)
+        }
       }
     },
     value: {
@@ -198,7 +201,7 @@ export default {
     },
     // 设置代理
     handleUpdateModel(vm) {
-      console.log({ ...this.value })
+      // console.log({ ...this.value })
       const proxyFormData = new Proxy(this.value, {
         get: (target, propKey, receiver) => {
           switch (propKey) {

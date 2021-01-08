@@ -1,6 +1,6 @@
 {
   "name": "form-fe-parser",
-  "version": "1.8.7",
+  "version": "1.8.8",
   "description": "",
   "main": "lib/form-fe-parser.umd.js",
   "scripts": {
