@@ -33,22 +33,12 @@ export default {
     }
   },
   watch: {
-    // $props: {
-    //   deep: true,
-    //   immediate: true,
-    //   handler() {
-    //     console.log(this.globalVar, '22222')
-    //     this.runHook('props')
-    //   }
-    // }
-    globalVar: {
+    $props: {
       deep: true,
       immediate: true,
-      handler(newVal, oldVal) {
-        if (newVal !== oldVal) {
-          // console.log(this.globalVar, '22222')
-          this.runHook('props')
-        }
+      handler() {
+        console.log(this.globalVar, '22222')
+        this.runHook('props')
       }
     }
   },

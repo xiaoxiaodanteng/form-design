@@ -1,4 +1,4 @@
-import Parser from './parser.js'
+import Parser from './Parser.vue'
 import { emit } from './parseHooks'
 const componentFiles = require.context('./components', true, /\.(js|vue)$/)
 

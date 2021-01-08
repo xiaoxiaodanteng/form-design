@@ -1,5 +1,5 @@
 <template>
-  <parser-com
+  <parser-view
     v-if="isShowParser"
     v-model="formDataModel"
     v-bind="$attrs"
@@ -10,10 +10,10 @@
 </template>
 
 <script>
-import ParserCom from './ParserComponent'
+import ParserView from './parserView'
 export default {
   name: 'Parser',
-  components: { ParserCom },
+  components: { ParserView },
   props: {
     formConf: {
       type: Object,
@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     isShowParser() {
-      return Object.keys(this.formConf).length > 0
+      return this.formConf && Object.keys(this.formConf).length > 0
     },
     formDataModel: {
       get() {
