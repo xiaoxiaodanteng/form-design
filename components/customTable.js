@@ -40,7 +40,9 @@ export default {
     // 获取render函数
     const code = this.iGetInnerText(this.scheme.__render__)
     // eslint-disable-next-line no-unused-vars
-    const $form = this.formData
+    const $form = this.parser.parserFormData
+    // eslint-disable-next-line no-unused-vars
+    const $component = this.parser.componentModel
     // eslint-disable-next-line no-unused-vars
     const $this = this.currentProxy()
     const fnStr = this.getHookStr(code)

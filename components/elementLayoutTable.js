@@ -158,6 +158,7 @@ export default {
                   return h('el-row', { class: className, attrs: { tabindex: '1' }, nativeOn: {
                     click: event => {
                       event.stopPropagation()
+                      console.log(123666)
                       this.parser.activeItem(row[childConfig.field])
                       row[childConfig.field].__config__.children.length === 0 && this.$refs[id] && this.$refs[id].handleFocus()
                     },
@@ -185,11 +186,6 @@ export default {
                     }
                   }}, [
                     row[childConfig.field].__config__.children.length === 0 && h('TableInput', { ref: id, props: { required: row[childConfig.field].__config__.required, value: row[childConfig.field].__config__.defaultValue }, on: { input: event => { row[childConfig.field].__config__.defaultValue = event } }}),
-
-                    // row[childConfig.field].__config__.children.length === 0 && h('span', { class: {
-                    //   'showValue': true,
-                    //   required: row[childConfig.field].__config__.required && row[childConfig.field].__config__.defaultValue
-                    // }}, row[childConfig.field].__config__.defaultValue),
 
                     this.parser.renderChildren(h, row[childConfig.field].__config__.children)
                   ])

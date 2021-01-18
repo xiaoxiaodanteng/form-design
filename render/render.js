@@ -143,6 +143,13 @@ function buildDataObject(confClone, dataObject) {
     dataObject.attrs['on-exceed'] = (file) => {
       this.$message.info('已超出上传文件限制')
     }
+    dataObject.attrs['on-preview'] = (file) => {
+      var a = document.createElement('a')
+      var event = new MouseEvent('click')
+      a.download = file.name
+      a.href = file.url
+      a.dispatchEvent(event)
+    }
   }
 
   // console.log(dataObject)

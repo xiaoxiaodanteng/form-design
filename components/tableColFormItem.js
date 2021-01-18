@@ -113,7 +113,7 @@ export default {
       labelWidth
     }
     const rules = this.getTableColumnRules(this.scheme, column)
-    if (this.formData[parent.__vModel__] && this.formData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.required) {
+    if (this.parser.parserFormData[parent.__vModel__] && this.parser.parserFormData[parent.__vModel__].length > 0 && column.__config__.children && column.__config__.required) {
       props.prop = `${parent.__vModel__}.${columnIndex}.${column.__config__.field}`
       props.rules = rules
     }

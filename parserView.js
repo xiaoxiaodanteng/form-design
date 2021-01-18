@@ -92,11 +92,15 @@ export default {
       handler(newVal, oldVal) {
         if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
           if (Object.keys(this.value).length > 0) {
-            for (const [key, value] of Object.entries(this.value)) {
-              this.$set(this.parserFormData, key, value)
-            }
+            // for (const [key, value] of Object.entries(this.value)) {
+            //   this.$set(this.parserFormData, key, value)
+            // }
             // this.$emit('input', this.parserFormData)
-            // this.parserFormData = this.handleUpdateModel(this)
+            this.parserFormData = this.handleUpdateModel(this)
+            for (const [key, value] of Object.entries(this.value)) {
+              // this.$set(this.parserFormData, key, value)
+              this.parserFormData[key] = value
+            }
           }
         }
         this.runHook('watch', newVal, oldVal)
@@ -211,6 +215,7 @@ export default {
               this.$refs[this.formConf.formRef].validate(valid => {
                 isValidated = valid
               })
+              console.log({ ...this.value }, '---表单数据---', `---__validated__: ${isValidated}`)
               return isValidated
             }
             case 'value':
@@ -440,7 +445,7 @@ export default {
           components
         )
       }
-      return <draggable class={isRoot ? 'drawing-board' : 'drag-wrapper'} list={children}
+      return <draggable animation={0} class={isRoot ? 'drawing-board' : 'drag-wrapper'} list={children}
         group='componentsGroup'>
         {
           components

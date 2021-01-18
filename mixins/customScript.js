@@ -54,17 +54,21 @@ export default {
     },
 
     componentValue() {
-      if (this.parser.isAddToForm) {
-        return this.parser.isAddToForm(this.scheme.__config__) ? this.formData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
-      } else {
-        // 数组数据
-        if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
-          return this.scheme.data
-        }
-        // 其他
-        if (!this.scheme || !this.scheme.__config__ || !Object.keys(this.scheme.__config__).includes('defaultValue')) return ''
-        return this.scheme.__config__.defaultValue
-      }
+      this.parser.isAddToForm(this.scheme.__config__) ? this.parser.parserFormData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
+      // if (this.parser.isAddToForm(this.scheme.__config__)) {
+      //   return this.parser.isAddToForm(this.scheme.__config__) ? this.formData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
+      // } else {
+      //   // 数组数据
+      //   if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
+      //     return this.scheme.data
+      //   }
+      //   // 其他
+      //   if (!this.scheme || !this.scheme.__config__) return ''
+      //   return this.scheme.__config__.defaultValue
+      // }
+    },
+    defaultValue() {
+      return this.scheme.__config__.defaultValue
     }
   },
   watch: {
@@ -91,8 +95,17 @@ export default {
     componentValue: {
       deep: true,
       immediate: true,
-      handler() {
+      handler(val) {
         this.runHook('watch')
+      }
+    },
+    defaultValue(val) {
+      if (this.mode === 'edit') {
+        if (this.parser.isAddToForm(this.scheme.__config__)) {
+          this.parser.parserFormData[this.scheme.__vModel__] = val
+        } else {
+          this.parser.componentModel[this.scheme.__vModel__] = val
+        }
       }
     }
   },

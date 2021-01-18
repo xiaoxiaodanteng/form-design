@@ -120,8 +120,8 @@ export default {
     const listeners = this.parser.buildListeners(this.scheme)
     let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
     // 表单元素
-    if (this.formData && Object.keys(this.formData).includes(this.scheme.__vModel__) && this.parser.isAddToForm(config)) {
-      this.scheme.__config__.defaultValue = this.formData[this.scheme.__vModel__]
+    if (this.parser.parserFormData && Object.keys(this.parser.parserFormData).includes(this.scheme.__vModel__) && this.parser.isAddToForm(config)) {
+      this.scheme.__config__.defaultValue = this.parser.parserFormData[this.scheme.__vModel__]
     } else { // 非表单元素
       this.scheme.__config__.defaultValue = this.parser.componentModel[this.scheme.__vModel__]
     }

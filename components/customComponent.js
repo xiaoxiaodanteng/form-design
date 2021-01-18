@@ -59,11 +59,20 @@ export default {
 
     const listeners = this.parser.buildListeners(this.scheme)
 
+    const nativeOn = {}
+
+    if (this.mode === 'edit') {
+      nativeOn.click = event => {
+        event.preventDefault()
+        this.parser.activeItem(this.scheme)
+      }
+    }
+
     const component = h('render', {
       props: {
         conf: {
           ...this.scheme,
-          href: this.mode === 'edit' ? '' : this.scheme.href // 处理编辑模式下 el-link不跳转
+          href: this.mode === 'edit' ? null : this.scheme.href // 处理编辑模式下 el-link不跳转
         }
       },
       on: listeners,
@@ -73,12 +82,7 @@ export default {
       //     this.$set(config, 'defaultValue', value)
       //   }
       // },
-      nativeOn: {
-        click: event => {
-          event.preventDefault()
-          this.parser.activeItem(this.scheme)
-        }
-      }
+      nativeOn
     }, [
       config.defaultValue,
       this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
