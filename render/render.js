@@ -129,15 +129,15 @@ function buildDataObject(confClone, dataObject) {
         const isRightSize = file.size / unitNum < config.fileSize
         if (!isRightSize) {
           this.$message.error(`文件大小超过 ${config.fileSize}${config.sizeUnit}`)
+          return isRightSize
         }
-        return isRightSize
       }
-      if (config.accept) {
-        const isAccept = new RegExp(config.accept).test(file.type)
+      if (confClone.accept) {
+        const isAccept = new RegExp(confClone.accept).test(file.type)
         if (!isAccept) {
-          this.$message.error(`应该选择${config.accept}类型的文件`)
+          this.$message.error(`应该选择${confClone.accept}类型的文件`)
+          return isAccept
         }
-        return isAccept
       }
     }
     dataObject.attrs['on-exceed'] = (file) => {
@@ -148,6 +148,7 @@ function buildDataObject(confClone, dataObject) {
       var event = new MouseEvent('click')
       a.download = file.name
       a.href = file.url
+      a.target = '_blank'
       a.dispatchEvent(event)
     }
   }
