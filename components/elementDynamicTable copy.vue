@@ -94,10 +94,10 @@ export default {
             conf: scheme
           },
           on: {
-            selectionChange: (val) => {
+            'selection-change': (val) => {
               this[`multipleSelection${config.renderKey}`] = val
             },
-            currentChange: (val) => {
+            'current-change': (val) => {
               this.currentRow = val
             }
           }

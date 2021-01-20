@@ -93,13 +93,14 @@ export default {
       ]),
 
       h('render', { props: { conf: scheme }, on: {
-        oncurrentChange: val => {
+        'current-change': val => {
           this.currentRow = val
         },
-        onselectionChange: (val) => {
+        'selection-change': (val) => {
           this[`multipleSelection${config.renderKey}`] = val
         },
-        onheaderClick: column => {
+        'header-click': (column, event) => {
+          event.stopPropagation()
           this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
         }
       }}, [
@@ -128,12 +129,12 @@ export default {
             header: ({ column }) => {
               // 渲染模式
               if (this.mode !== 'edit') {
-                return childConfig.show && h('span', column.label)
+                return childConfig.show && h('span', { class: childConfig.required ? 'required' : '' }, column.label)
               }
               return h('div', { class: childConfig.show ? 'drawing-row-item' : 'drawing-row-item is-hide' }, [
-                h('span', column.label),
+                h('span', { class: childConfig.required ? 'required' : '' }, column.label),
                 h('div', { class: 'draw-actions draw-el-table-header-actions' }, [
-                  h('span', { class: 'drawing-item-delete drawing-item-action', attrs: { title: '删除该字段' }, on: { click: event => {
+                  h('span', { class: { 'drawing-item-delete drawing-item-action': true, required: childConfig.required }, attrs: { title: '删除该字段' }, on: { click: event => {
                     event.stopPropagation()
                     this.scheme.__config__.children.splice(index, 1)
                   } }}, [h('i', { class: 'el-icon-delete' })])

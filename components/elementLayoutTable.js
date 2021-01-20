@@ -130,7 +130,8 @@ export default {
         ]),
 
         h('render', { props: { conf: scheme }, on: {
-          headerClick: column => {
+          'header-click': (column, event) => {
+            event.stopPropagation()
             this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
           },
           'current-change': val => {
@@ -158,7 +159,6 @@ export default {
                   return h('el-row', { class: className, attrs: { tabindex: '1' }, nativeOn: {
                     click: event => {
                       event.stopPropagation()
-                      console.log(123666)
                       this.parser.activeItem(row[childConfig.field])
                       row[childConfig.field].__config__.children.length === 0 && this.$refs[id] && this.$refs[id].handleFocus()
                     },
