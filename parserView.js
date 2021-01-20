@@ -300,7 +300,8 @@ export default {
       let value = event
       if (isNumber) {
         if (!isNaN(value)) {
-          value = +value
+          // value = +value
+          value = this.formatterValue(scheme, value)
         }
       }
       this.$set(config, 'defaultValue', value)
@@ -309,6 +310,28 @@ export default {
       } else {
         this.$set(this.componentModel, scheme.__vModel__, value)
       }
+    },
+
+    formatterValue(scheme, event) {
+      // 输入框数字类型
+      if (scheme.__config__.numberType) {
+        // 整数类型
+        if (scheme.__config__.numberType === 'Int') {
+          return event.replace('.', '')
+        } else if (scheme.__config__.numberType === 'Decimal') {
+          // 是否需要限制小数点位数
+          const limit = scheme.__config__.decimalPointLength
+          if (scheme.__config__.decimalPointLength) {
+            const numberValues = event.split('.')
+            if (numberValues[1] && numberValues[1].length > limit) {
+              numberValues[1] = numberValues[1].slice(0, limit)
+            }
+            return numberValues.join('.')
+          }
+        }
+      }
+
+      return event
     },
 
     fetch(url, params) {

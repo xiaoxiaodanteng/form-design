@@ -222,10 +222,10 @@ export default {
       let value = event
       if (isNumber) {
         if (!isNaN(value)) {
-          value = +value
+          // value = +value
+          value = this.formatterValue(scheme, value)
         }
       }
-      value = this.formatterValue(scheme, value)
       this.$set(config, 'defaultValue', value)
       if (this.parserFormData && this.isAddToForm(scheme.__config__)) {
         this.$set(this.parserFormData, scheme.__vModel__, value)
