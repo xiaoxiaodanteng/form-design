@@ -133,7 +133,15 @@ function buildDataObject(confClone, dataObject) {
         }
       }
       if (confClone.accept) {
-        const isAccept = new RegExp(confClone.accept).test(file.type)
+        let isAccept
+        // 多类型
+        if (confClone.accept[0] === '.') {
+          const fileName = `.${file.name.substring(file.name.lastIndexOf('.') + 1)}`
+          const regs = confClone.accept.split(',').map(item => `(${item})`).join('|')
+          isAccept = new RegExp(regs).test(fileName)
+        } else {
+          isAccept = new RegExp(confClone.accept).test(file.type)
+        }
         if (!isAccept) {
           this.$message.error(`应该选择${confClone.accept}类型的文件`)
           return isAccept
