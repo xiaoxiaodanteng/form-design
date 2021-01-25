@@ -284,7 +284,7 @@ export default {
       this.hookHandler(
         fnStr,
         this.currentProxy(),
-        this.formData,
+        this.parser.parserFormData,
         this.parser.componentModel,
         this.parser.globalVar || this.parser.$attrs['global-var'] || {},
         this.row

@@ -80,9 +80,8 @@ export default {
         // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
+        this.mode === 'edit' && this.initFormData(this.formConf.fields, this.parserFormData, this)
         if (newVal !== oldVal) {
-          // console.log({ ...this.parserFormData }, { ...this.value }, '----fields', newVal === oldVal)
-
           this.initFormData(this.formConf.fields, this.parserFormData, this)
         }
       }
