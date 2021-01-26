@@ -110,7 +110,8 @@ export default {
       props: {
         conf: {
           ...this.scheme,
-          href: this.mode === 'edit' ? null : this.scheme.href // 处理编辑模式下 el-link不跳转
+          href: this.mode === 'edit' ? null : this.scheme.href, // 处理编辑模式下 el-link不跳转
+          target: this.scheme.href ? '_blank' : null
         }
       },
       on: listeners,

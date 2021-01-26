@@ -1,15 +1,9 @@
+
 import { parse, parseExpression } from '@babel/parser'
 import traverse from '@babel/traverse'
-import generator from '@babel/generator'
-import * as t from '@babel/types'
 import graphqlRequest from '../graphqlRequest'
+import generator from '@babel/generator'
 
-// 钩子函数
-// const hookMap = {
-//   beforeCreate: 'beforeCreate',
-//   created: 'created',
-//   mounted: 'mounted'
-// }
 // 自身方法
 const selfMethodMap = {
   'fn_summary-method': 'summary-method',
@@ -55,17 +49,6 @@ export default {
 
     componentValue() {
       this.parser.isAddToForm(this.scheme.__config__) ? this.parser.parserFormData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
-      // if (this.parser.isAddToForm(this.scheme.__config__)) {
-      //   return this.parser.isAddToForm(this.scheme.__config__) ? this.formData[this.scheme.__vModel__] : this.parser.componentModel[this.scheme.__vModel__]
-      // } else {
-      //   // 数组数据
-      //   if (this.scheme.__config__ && this.scheme.__config__.tag === 'el-table' && this.scheme.__config__.tableType !== 'layout') {
-      //     return this.scheme.data
-      //   }
-      //   // 其他
-      //   if (!this.scheme || !this.scheme.__config__) return ''
-      //   return this.scheme.__config__.defaultValue
-      // }
     },
     defaultValue() {
       return this.scheme.__config__.defaultValue
@@ -140,24 +123,15 @@ export default {
       }
     },
     getHookStr(code) {
+      // 转es2015
+      // code = this.$babel.transform(code, {
+      //   presets: ['es2015']
+      // }).code
+
       const ast = parse(code)
       const vm = this
       // 转换变量信息
       traverse(ast, {
-        enter(path) {
-          // if (path.node.type === '')
-          // 如果需要控制其他组件 则查找替换组件内容
-        },
-        Identifier(path) {
-          // console.log(path)
-        },
-        BinaryExpression(path) {
-          // console.log(path)
-        },
-        ExpressionStatement(path) {
-          // console.log(path, generator(path.parentPath.node).code)
-          // path.insertAfter(t.assignmentExpression('=', t.identifier('$this.abcqqq'), t.booleanLiteral(true)))
-        },
         MemberExpression(path) {
           const { node } = path
           if (node.object.name === '$this') {
@@ -188,7 +162,7 @@ export default {
           }
 
           // 删除$form[field]的value
-          if (t.isMemberExpression(node.object) && node.object.object.name === '$form') {
+          if (node.object && node.object.object && (node.object.object.name === '$form' || node.object.object.name === '$component')) {
             if (node.property.name === 'value') {
               path.replaceWith(
                 node.object
@@ -199,38 +173,19 @@ export default {
               )
             }
           }
-          // 删除$form[field]的value
-          if (t.isMemberExpression(node.object) && node.object.object.name === '$component') {
-            if (node.property.name === 'value') {
-              path.replaceWith(
-                node.object
-              )
-            } else {
-              path.replaceWith(
-                parseExpression(`this.getComponentByField("${node.object.property.name}").${componentConfigAttrs.includes(node.property.name) ? '__config__.' : ''}${node.property.name}`)
-              )
-            }
-          }
-        },
-        AssignmentExpression(path) {
-          // console.log(path, generator(path.node).code)
-          // if (t.isIdentifier(path.node, { name: '$this' })) {
-          //   path.node.name = 'this.$attrs.globalVar'
-          // }
-          // console.log(generator(path.container).code)
-          // path.insertAfter(t.assignmentExpression('=', t.identifier('$this.abc'), t.booleanLiteral(true)))
-          // console.log(generator().code)
-          // path.pushContainer('body', t.assignmentExpression('=', t.identifier('abc'), t.booleanLiteral(true)))
-        },
-        ObjectProperty(path) {
-          // console.log(path, generator(path.node).code)
-        },
-        BlockStatement(path) {
-          // path.node.body.push(t.assignmentExpression('=', t.identifier('abc'), t.booleanLiteral(true)))
-          // console.log(path, generator(path.node).code)
         }
+
+        // UnaryExpression(path) {
+        //   // 将void 0 还原为this
+        //   if (path.node.operator === 'void') {
+        //     path.replaceWith(
+        //       parseExpression('this')
+        //     )
+        //   }
+        // }
       })
 
+      // return this.$babel.transformFromAst(ast, '', {}).code
       return generator(ast).code
     },
     currentProxy() {
@@ -281,7 +236,9 @@ export default {
       if (!code) return
       const fnStr = this.getHookStr(code)
       // console.log(fnStr)
-      this.hookHandler(
+      // eslint-disable-next-line no-useless-call
+      this.hookHandler.call(
+        this,
         fnStr,
         this.currentProxy(),
         this.parser.parserFormData,

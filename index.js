@@ -1,5 +1,6 @@
 import Parser from './Parser.vue'
 import { emit } from './parseHooks'
+// import loadBabel from '../../../utils/formGenerator/loadBabel'
 const componentFiles = require.context('./components', true, /\.(js|vue)$/)
 
 import Tinymce from './tinymce/index.vue'
@@ -22,6 +23,9 @@ ParserPlugin.install = (Vue, options = { hostname: 'http://bi.dev.nearbyexpress.
     const component = componentFiles(filePath).default
     Vue.component(component.name, component)
   })
+  // loadBabel((babel) => {
+  //   Vue.prototype.$babel = babel
+  // })
 }
 
 export function setAuthToken(token) {
