@@ -46,8 +46,8 @@ export default {
             attrs: {
               multiple: true,
               class: 'upload-table',
-              // action: process.env.NODE_ENV === 'development' ? 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload' : window.origin + '/api/dfilecenter/file/upload'
-              action: 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload'
+              action: process.env.NODE_ENV === 'development' ? 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload' : window.origin + '/api/dfilecenter/file/upload'
+              // action: 'http://bi.dev.nearbyexpress.com/api/dfilecenter/file/upload'
             },
             props: props
           }, [
