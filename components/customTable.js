@@ -34,8 +34,6 @@ export default {
   },
   render(h, context) {
     const { __config__: config } = this.scheme
-    // let labelWidth = config.labelWidth ? `${config.labelWidth}px` : null
-    // if (config.showLabel === false) labelWidth = '0'
 
     // 获取render函数
     const code = this.iGetInnerText(this.scheme.__render__)

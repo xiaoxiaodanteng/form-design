@@ -1,14 +1,14 @@
 {
   "name": "form-fe-parser",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "parser",
-  "main": "lib/form-fe-parser.umd.js",
+  "main": "lib/form-fe-parser.umd.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiaoxiaodanteng/form-parser.git"
+    "url": "git+http://gitlab.sunvalley.com.cn/data-station/form-fe-parser.git"
   },
   "keywords": [],
   "author": "",

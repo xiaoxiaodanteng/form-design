@@ -115,12 +115,6 @@ export default {
         }
       },
       on: listeners,
-      // on: {
-      //   input: event => {
-      //     const value = this.formatterValue(event)
-      //     this.$set(config, 'defaultValue', value)
-      //   }
-      // },
       nativeOn
     }, [
       config.defaultValue,

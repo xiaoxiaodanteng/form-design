@@ -64,13 +64,45 @@ export default {
 
     return h('render', { props: { conf: scheme }, on: { close: () => (this.scheme.visible = false) }}, [
       h('el-row', [
-        h('el-form', { props: { model: this.parser.parserFormData, labelWidth: `${this.parser.formConfCopy.labelWidth}px`, labelPosition: this.parser.formConfCopy.labelPosition, size: this.parser.formConf.size, disabled: this.parser.formConf.disabled }, ref: 'dialogForm' }, child)
+        h(
+          'el-form',
+          {
+            props: {
+              model: this.parser.parserFormData,
+              labelWidth: `${this.parser.formConfCopy.labelWidth}px`,
+              labelPosition: this.parser.formConfCopy.labelPosition,
+              size: this.parser.formConf.size,
+              disabled: this.parser.formConf.disabled
+            },
+            ref: 'dialogForm'
+          },
+          child
+        )
       ]),
 
-      h('div', { slot: 'footer', style: { textAlign: scheme.center ? 'center' : 'right' }}, [
-        scheme['show-close'] && h('el-button', { attrs: { size: 'mini' }, on: { click: () => (scheme.visible = false) }}, config.cancelText || '取消'),
-        h('el-button', { attrs: { size: 'mini' }, on: { click: () => (this.$refs.dialogForm.resetFields()) }}, '重置'),
-        h('el-button', { attrs: { size: 'mini', type: 'primary' }, on: { click: () => (this.submit()) }}, config.okText || '确定')
+      h('div', {
+        slot: 'footer',
+        style: {
+          textAlign: scheme.center ? 'center' : 'right'
+        }
+      }, [
+        scheme['show-close'] && h(
+          'el-button',
+          { attrs: { size: 'mini' }, on: { click: () => (scheme.visible = false) }},
+          config.cancelText || '取消'
+        ),
+
+        h(
+          'el-button',
+          { attrs: { size: 'mini' }, on: { click: () => (this.$refs.dialogForm.resetFields()) }},
+          '重置'
+        ),
+
+        h(
+          'el-button',
+          { attrs: { size: 'mini', type: 'primary' }, on: { click: () => (this.submit()) }},
+          config.okText || '确定'
+        )
       ])
     ])
   }

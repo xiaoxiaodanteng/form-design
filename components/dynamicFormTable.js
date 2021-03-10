@@ -125,47 +125,5 @@ export default {
         ])
       ])
     ])
-    // return (
-    //   <el-col span={config.span}>
-    //     <el-row class='row' >
-    //       <render key={config.renderKey} conf={scheme} on-selection-change={(val) => {
-    //         this[`multipleSelection${config.renderKey}`] = val
-    //       }}
-    //       on-current-change={val => {
-    //         this.currentRow = val
-    //       }}
-    //       >
-    //         {
-    //           // 多选
-    //           config.tableSelectType === 'multiple' && this.scheme.__config__.children.length > 0 ? <el-table-column
-    //             type='selection'
-    //             align='center'
-    //             width='55'>
-    //           </el-table-column> : null
-    //         },
-    //         { // 显示序号
-    //           config.showIndex ? <el-table-column type='index' align='center' width='50' label='序号'></el-table-column> : null
-    //         }
-    //         {this.scheme.__config__.children.map((child, index) => {
-    //           const { __config__: childConfig, ...attrs } = child
-    //           return childConfig.show ? <el-table-column column-key={`${index}`} label={childConfig.label} prop={childConfig.field} scopedSlots={{
-    //             default({ row, $index }) {
-    //               // scheme.data.forEach(item => console.log(item, row))
-    //               return (
-    //                 childConfig.children && childConfig.children.length > 0 ? self.parser.renderTableChildren(h, child, $index, row, self.scheme) : <span>{row[childConfig.field]}</span>
-    //               )
-    //             },
-    //             header({ column }) {
-    //               return <div>
-    //                 <span>{column.label}</span>
-    //               </div>
-    //             }
-    //           }} props={{ ...attrs }}>
-    //           </el-table-column> : null
-    //         })}
-    //       </render>
-    //     </el-row>
-    //   </el-col>
-    // )
   }
 }

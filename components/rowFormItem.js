@@ -37,7 +37,13 @@ export default {
     }
 
     return h('el-col', { attrs: { span: config.span }, class: this.mode === 'edit' ? 'drawing-row-item' : '' }, [
-      h('el-row', { attrs: { gutter: scheme.gutter }, class: 'row' }, [child]),
+      h(
+        'el-row',
+        {
+          attrs: { gutter: scheme.gutter }, class: 'row'
+        },
+        [child]
+      ),
       this.parser.itemBtns(h, this.scheme, this.index, this.parentList)
     ])
   }
