@@ -125,7 +125,7 @@ export default {
           'selection-change': (val) => {
             this[`multipleSelection${config.renderKey}`] = val
           },
-          headerClick: (column, event) => {
+          'header-click': (column, event) => {
             event.stopPropagation()
             this.parser.activeItem(this.scheme.__config__.children[column.columnKey])
           }
