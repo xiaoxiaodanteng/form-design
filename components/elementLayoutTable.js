@@ -136,7 +136,6 @@ export default {
             this.currentRow = val
           },
           'cell-click': (row, column, cell, event) => {
-            console.log(row, column, cell)
             event.stopPropagation()
             this.parser.activeItem(row[column.property])
           }
@@ -153,7 +152,6 @@ export default {
             const newAttrs = {
               ...attrs, className: !childConfig.show ? 'hidden-item' : '', columnKey: `${index}`, label: childConfig.label, prop: childConfig.field
             }
-            console.log(index, { ...newAttrs })
             return h('el-table-column', {
               attrs: newAttrs,
               scopedSlots: {
@@ -228,7 +226,7 @@ export default {
                   }
 
                   return row[childConfig.field].__config__.children.length > 0 ? this.parser.renderChildren(h, row[childConfig.field].__config__.children)
-                    : h('span', { class: row[childConfig.field].__config__.required && row[childConfig.field].__config__.defaultValue ? 'cell-value required' : '' }, row[childConfig.field].__config__.defaultValue)
+                    : h('span', { class: row[childConfig.field].__config__.required && row[childConfig.field].__config__.defaultValue ? 'cell-value required' : 'cell-value' }, row[childConfig.field].__config__.defaultValue)
                 },
                 header: ({ column }) => {
                 // 渲染模式
@@ -246,17 +244,23 @@ export default {
                   ])
                 }
               }})
-          })
+          }),
 
           // 操作
-          // this.mode === 'edit' && h('el-table-column', { attrs: { align: 'center', label: '操作', width: '60px' }, scopedSlots: {
-          //   default: ({ row, $index }) => {
-          //     return h('div', [
-          //       h('el-link', { attrs: { icon: 'el-icon-circle-plus-outline', type: 'primary' }, style: { fontSize: '18px' }, on: { click: event => this.addTableRow(event, $index) }}),
-          //       h('el-link', { attrs: { icon: 'el-icon-remove-outline', type: 'danger' }, style: { fontSize: '18px' }, on: { click: event => this.delRow(event, $index) }})
-          //     ])
-          //   }
-          // }})
+          this.mode === 'edit' && this.scheme.__config__.children.length > 0 && h('el-table-column', { attrs: { align: 'center', label: '操作', width: '60px' }, scopedSlots: {
+            default: ({ row, $index }) => {
+              return h('div', [
+                h('el-link', { attrs: { icon: 'el-icon-circle-plus-outline', type: 'primary' }, style: { fontSize: '18px' }, on: { click: event => {
+                  event.stopPropagation()
+                  this.addTableRow(event, $index)
+                } }}),
+                h('el-link', { attrs: { icon: 'el-icon-remove-outline', type: 'danger' }, style: { fontSize: '18px' }, on: { click: event => {
+                  event.stopPropagation()
+                  this.delRow(event, $index)
+                } }})
+              ])
+            }
+          }})
         ])
       ]),
 

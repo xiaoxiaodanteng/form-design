@@ -1,6 +1,8 @@
 import { deepClone } from '@/utils/formGenerator/index'
+import { Loading } from 'element-ui'
 
 const componentChild = {}
+let loadingInstance = null
 /**
  * 将./slots中的文件挂载到对象componentChild上
  * 文件名为key，对应JSON配置中的__config__.tag
@@ -81,7 +83,11 @@ function buildDataObject(confClone, dataObject) {
       } else if (Array.isArray(dataObject[key])) {
         dataObject[key] = [...dataObject[key], ...val]
       } else {
-        dataObject[key] = { ...dataObject[key], ...val }
+        dataObject[key] = {
+          ...dataObject[key],
+          ...val,
+          [`fe-upload-${confClone.__vModel__}`]: true
+        }
       }
     } else {
       dataObject.attrs[key] = val
@@ -101,6 +107,7 @@ function buildDataObject(confClone, dataObject) {
     const config = confClone.__config__
     const self = this
     dataObject.attrs['on-success'] = (response, file, fileList) => {
+      loadingInstance && loadingInstance.close()
       const values = fileList.map(item => {
         const { response, ...temp } = item
 
@@ -147,6 +154,13 @@ function buildDataObject(confClone, dataObject) {
           return isAccept
         }
       }
+
+      loadingInstance = Loading.service({
+        target: document.querySelector(`.fe-upload-${confClone.__vModel__}`),
+        spinner: 'el-icon-loading',
+        text: '正在上传中...',
+        body: true
+      })
     }
     dataObject.attrs['on-exceed'] = (file) => {
       this.$message.info('已超出上传文件限制')
