@@ -232,8 +232,13 @@ export default {
           }
         },
         set: (target, propKey, value, receiver) => {
-          this.setValueByField(propKey, value, vm)
-          return Reflect.set(target, propKey, value, receiver)
+          let newVal = value
+          // hack for upload
+          if (Array.isArray(value) && value.every(item => item === undefined)) {
+            newVal = []
+          }
+          this.setValueByField(propKey, newVal, vm)
+          return Reflect.set(target, propKey, newVal, receiver)
         }
       })
 
