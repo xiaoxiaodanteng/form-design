@@ -12,6 +12,10 @@ export default {
     index: {
       type: Number,
       required: true
+    },
+    parentList: {
+      type: Array,
+      default: () => ([])
     }
   },
   data() {

@@ -2,10 +2,10 @@
 import { createHash, deepClone } from '../utils/'
 export default {
   methods: {
-    drawingItemCopy(item, list) {
+    drawingItemCopy(index, item, list) {
       let clone = deepClone(item)
       clone = this.createIdAndKey(clone)
-      list.push(clone)
+      list.splice(index, 0, clone)
       this.activeItem(clone)
     },
     drawingItemAdd(item, list) {

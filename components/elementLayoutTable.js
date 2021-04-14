@@ -167,7 +167,7 @@ export default {
                   // eslint-disable-next-line no-unused-vars
                   const $this = cellData
                   // 获取render函数
-                  const code = this.iGetInnerText(cellData.__render__)
+                  const code = this.iGetInnerText(cellData.__render__ || '')
                   if (code) {
                     const fnStr = this.getHookStr(code)
                     let renderFn

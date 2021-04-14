@@ -426,7 +426,7 @@ export default {
       return (
         <div class='draw-actions'>
           <span class='drawing-item-copy drawing-item-action' title='复制' onClick={event => {
-            this.drawingItemCopy(currentItem, parentList); event.stopPropagation()
+            this.drawingItemCopy(index, currentItem, parentList); event.stopPropagation()
           }}>
             <i class='el-icon-copy-document' />
           </span>

@@ -1,14 +1,22 @@
 <template>
   <div class="fe-input" @click="handleClick">
-    <p v-show="!showInput" class="fe-input-value">{{ inputValue }}</p>
+    <p v-show="!showInput" :style="{minHeight, 'justify-content': align}" class="fe-input-value">
+      <span :style="prependStyle">{{ prepend }}</span>{{ inputValue }}<span :style="appendStyle">{{ append }}</span>
+    </p>
     <el-form-item v-bind="attrs" label-width="0">
       <el-input
-        v-if="showInput"
+        v-if="showInput && !$scopedSlots.default"
         ref="input"
         v-model="inputValue"
         v-bind="attrs"
         v-on="$listeners"
-      />
+      >
+        <template v-if="prepend" slot="prepend">{{ prepend }}</template>
+        <template v-if="append" slot="append">{{ append }}</template>
+      </el-input>
+      <template v-if="showInput && $scopedSlots.default">
+        <slot />
+      </template>
     </el-form-item>
   </div>
 </template>
@@ -28,6 +36,30 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    prepend: {
+      type: String,
+      default: ''
+    },
+    append: {
+      type: String,
+      default: ''
+    },
+    prependStyle: {
+      type: Object,
+      default: () => ({})
+    },
+    appendStyle: {
+      type: Object,
+      default: () => ({})
+    },
+    minHeight: {
+      type: String,
+      default: '40px'
+    },
+    align: {
+      type: String,
+      default: 'left'
     }
   },
   data() {
@@ -63,7 +95,7 @@ export default {
       if (this.disabled) return
       this.showInput = true
       this.$nextTick(() => {
-        this.$refs.input.focus()
+        this.$refs.input && this.$refs.input.focus()
       })
     },
     init(e) {
@@ -85,8 +117,8 @@ export default {
     width: 100%;
     height: 100%;
     display: flex;
-    min-height: 40px;
     align-items: center;
+    font-size: 12px;
   }
 }
 </style>
