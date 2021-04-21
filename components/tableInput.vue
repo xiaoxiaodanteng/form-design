@@ -1,5 +1,12 @@
 <template>
-  <div ref="tableInput" :style="{zIndex: actived ? 9 : 8}" class="table-input" :class="{required: required&&value.length > 0}" contenteditable="true" @input="onInput" />
+  <div
+    ref="tableInput"
+    :style="{zIndex: actived ? 9 : 8}"
+    class="table-input"
+    :class="{required: required&&value.length > 0}"
+    contenteditable="true"
+    @input="onInput"
+  />
 </template>
 
 <script>

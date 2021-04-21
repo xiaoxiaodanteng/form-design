@@ -528,6 +528,7 @@ export default {
         ref={this.formConf.formRef}
         // model不能直接赋值 https://github.com/vuejs/jsx/issues/49#issuecomment-472013664
         props={{ model: this.parserFormData }}
+        nativeOnSubmit={event => { event.preventDefault() }}
       >
         {
           // 组件列表
