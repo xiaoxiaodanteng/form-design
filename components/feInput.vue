@@ -1,7 +1,9 @@
 <template>
   <div class="fe-input" @click="handleClick">
     <p v-show="!showInput" :style="{minHeight, 'justify-content': align}" class="fe-input-value">
-      <span :style="prependStyle">{{ prepend }}</span>{{ inputValue }}<span :style="appendStyle">{{ append }}</span>
+      <span :style="prependStyle">{{ prepend }}</span>
+      <pre>{{ inputValue }}</pre>
+      <span :style="appendStyle">{{ append }}</span>
     </p>
     <el-form-item v-bind="attrs" label-width="0">
       <el-input
@@ -119,6 +121,15 @@ export default {
     display: flex;
     align-items: center;
     font-size: 12px;
+    line-height: 20px;
+  }
+  pre {
+    font-family: PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif, Helvetica Neue, Helvetica;
+    font-size: 12px;
+    white-space: pre-wrap!important;
+    word-wrap: break-word!important;
+    width: 100%;
+    line-height: 20px;
   }
 }
 </style>
