@@ -163,6 +163,8 @@ export default {
                   // eslint-disable-next-line no-unused-vars
                   const $form = this.parser.parserFormData
                   // eslint-disable-next-line no-unused-vars
+                  const $props = this.parser.globalVar || this.parser.$attrs['global-var'] || {}
+                  // eslint-disable-next-line no-unused-vars
                   const $component = this.parser.componentModel
                   // eslint-disable-next-line no-unused-vars
                   const $this = cellData
