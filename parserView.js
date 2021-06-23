@@ -65,6 +65,7 @@ export default {
     this.setModelToProxy(data.componentModel, data)
     // 初始化表单数据
     this.initFormData(this.formConf.fields, data.parserFormData, data)
+    console.log(data.parserFormData)
     return data
   },
   watch: {
@@ -80,10 +81,13 @@ export default {
         // this.setModelToProxy(this.componentModel, this)
 
         // 初始化表单数据
-        this.mode === 'edit' && this.initFormData(this.formConf.fields, this.parserFormData, this)
-        if (newVal !== oldVal) {
+        if (this.mode === 'edit' && newVal !== oldVal) {
           this.initFormData(this.formConf.fields, this.parserFormData, this)
         }
+        // this.mode === 'edit' && this.initFormData(this.formConf.fields, this.parserFormData, this)
+        // if (newVal !== oldVal) {
+        //   this.initFormData(this.formConf.fields, this.parserFormData, this)
+        // }
       }
     },
     value: {
