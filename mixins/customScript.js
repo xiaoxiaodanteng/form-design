@@ -68,12 +68,6 @@ export default {
     mountedCode() {
       this.runHook('mounted')
     },
-    scheme: {
-      deep: true,
-      immediate: true,
-      handler() {
-      }
-    },
     // 值变化
     componentValue: {
       deep: true,
@@ -81,16 +75,16 @@ export default {
       handler(val) {
         this.runHook('watch')
       }
-    },
-    defaultValue(val) {
-      if (this.mode === 'edit') {
-        if (this.parser.isAddToForm(this.scheme.__config__)) {
-          this.parser.parserFormData[this.scheme.__vModel__] = val
-        } else {
-          this.parser.componentModel[this.scheme.__vModel__] = val
-        }
-      }
     }
+    // defaultValue(val) {
+    //   if (this.mode === 'edit') {
+    //     if (this.parser.isAddToForm(this.scheme.__config__)) {
+    //       this.parser.parserFormData[this.scheme.__vModel__] = val
+    //     } else {
+    //       this.parser.componentModel[this.scheme.__vModel__] = val
+    //     }
+    //   }
+    // }
   },
   created() {
     // 初始化自定义脚本事件
@@ -115,9 +109,10 @@ export default {
             let fn
             // eslint-disable-next-line no-eval
             eval(`fn = ${value}`)
-            this.$nextTick(() => {
-              this.$set(this.scheme, key.replace('fn_', ''), fn)
-            })
+            this.$set(this.scheme, key.replace('fn_', ''), fn)
+            // this.$nextTick(() => {
+            //   this.$set(this.scheme, key.replace('fn_', ''), fn)
+            // })
           }
         }
       }

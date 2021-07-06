@@ -19,10 +19,6 @@ export default {
     }
   },
   data() {
-    // createdFn = function() {
-    //   console.log(this)
-    // }
-
     const data = {
     }
 
@@ -71,16 +67,6 @@ export default {
     }
 
     const component = renderFn.call(this, h, context)
-    // 判断是否需要form-item
-    // const formItemComponent = config.isFormItem ? h('el-form-item', {
-    //   attrs: {
-    //     labelWidth,
-    //     // prop: this.scheme.__vModel__,
-    //     label: config.showLabel ? config.label : '',
-    //     required: config.required
-    //   }
-
-    // }, [component]) : component
 
     return config.isNeedCol ? h('el-col', {
       attrs: {

@@ -32,6 +32,7 @@ export default {
       this.activeItem(item)
     },
     drawingItemDelete(index, list) {
+      // console.log(index)
       list.splice(index, 1)
       this.$nextTick(() => {
         const len = this.fields.length

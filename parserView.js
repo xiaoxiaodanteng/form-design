@@ -74,20 +74,9 @@ export default {
       handler(newVal, oldVal) {
         // 设置表单全局属性
         this.setForm()
-
-        // 初始化数据
-        // this.parserFormData = this.handleUpdateModel(this)
-        // 设置代理
-        // this.setModelToProxy(this.componentModel, this)
-
-        // 初始化表单数据
         if (this.mode === 'edit' && newVal !== oldVal) {
           this.initFormData(this.formConf.fields, this.parserFormData, this)
         }
-        // this.mode === 'edit' && this.initFormData(this.formConf.fields, this.parserFormData, this)
-        // if (newVal !== oldVal) {
-        //   this.initFormData(this.formConf.fields, this.parserFormData, this)
-        // }
       }
     },
     value: {
@@ -95,13 +84,8 @@ export default {
       handler(newVal, oldVal) {
         if (newVal !== oldVal && oldVal.value && oldVal.value === newVal) {
           if (Object.keys(this.value).length > 0) {
-            // for (const [key, value] of Object.entries(this.value)) {
-            //   this.$set(this.parserFormData, key, value)
-            // }
-            // this.$emit('input', this.parserFormData)
             this.parserFormData = this.handleUpdateModel(this)
             for (const [key, value] of Object.entries(this.value)) {
-              // this.$set(this.parserFormData, key, value)
               this.parserFormData[key] = value
             }
           }

@@ -92,7 +92,7 @@ function buildDataObject(confClone, dataObject) {
     } else {
       dataObject.attrs[key] = val
       if (key === 'action') {
-        dataObject.attrs[key] = `${this.$hostname}/api/dfilecenter/file/upload`
+        dataObject.attrs[key] = `${this.$hostname}${dataObject.attrs[key]}`
       }
     }
   })
